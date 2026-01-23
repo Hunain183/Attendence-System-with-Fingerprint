@@ -1,4 +1,4 @@
-import { clsx } from '../utils/clsx';
+import { clsx } from '../../utils/clsx';
 
 interface BadgeProps {
   children: React.ReactNode;

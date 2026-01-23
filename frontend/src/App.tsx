@@ -7,15 +7,18 @@ import {
   EmployeesPage,
   AttendancePage,
   ReportsPage,
+  KioskPage,
 } from './pages';
 
 function App() {
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public routes - Kiosk for employees to mark attendance */}
+      <Route path="/" element={<KioskPage />} />
+      <Route path="/kiosk" element={<KioskPage />} />
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Protected routes */}
+      {/* Protected routes - Admin panel */}
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
@@ -25,11 +28,8 @@ function App() {
         </Route>
       </Route>
 
-      {/* Redirect root to dashboard */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-      {/* 404 - Redirect to dashboard */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      {/* 404 - Redirect to kiosk */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

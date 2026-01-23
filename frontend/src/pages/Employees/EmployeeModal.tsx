@@ -105,9 +105,6 @@ export function EmployeeModal({
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     }
-    if (formData.cnic && !/^\d{5}-\d{7}-\d$/.test(formData.cnic)) {
-      newErrors.cnic = 'CNIC format should be 12345-1234567-1';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -121,13 +118,24 @@ export function EmployeeModal({
     try {
       setLoading(true);
 
-      // Clean empty strings to undefined
-      const cleanData = Object.fromEntries(
-        Object.entries(formData).filter(([, v]) => v !== '')
-      ) as EmployeeCreate | EmployeeUpdate;
+      // Clean empty strings - only include non-empty values
+      // For date_of_joining, convert to ISO format if present
+      const cleanData: Partial<EmployeeCreate> = {};
+      for (const [key, value] of Object.entries(formData)) {
+        if (value !== '' && value !== null && value !== undefined) {
+          if (key === 'date_of_joining' && value) {
+            // Convert date string to ISO datetime format
+            cleanData[key as keyof EmployeeCreate] = `${value}T00:00:00`;
+          } else {
+            (cleanData as Record<string, string>)[key] = value;
+          }
+        }
+      }
+      
+      console.log('Submitting employee data:', JSON.stringify(cleanData, null, 2));
 
       if (isEditMode && employee) {
-        await employeeApi.update(employee.id, cleanData);
+        await employeeApi.update(employee.id, cleanData as EmployeeUpdate);
         toast.success('Employee updated successfully');
       } else {
         await employeeApi.create(cleanData as EmployeeCreate);
@@ -136,9 +144,17 @@ export function EmployeeModal({
 
       onClose(true);
     } catch (error) {
-      const message =
-        (error as { response?: { data?: { detail?: string } } }).response?.data
-          ?.detail || 'Operation failed';
+      console.error('Employee creation error:', error);
+      const errorResponse = (error as { response?: { data?: { detail?: string | Array<{msg: string}> } } }).response?.data?.detail;
+      
+      let message = 'Operation failed';
+      if (typeof errorResponse === 'string') {
+        message = errorResponse;
+      } else if (Array.isArray(errorResponse) && errorResponse.length > 0) {
+        // Pydantic validation errors come as array
+        message = errorResponse.map(e => e.msg).join(', ');
+      }
+      
       toast.error(message);
     } finally {
       setLoading(false);

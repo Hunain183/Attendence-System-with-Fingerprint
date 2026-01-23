@@ -1,7 +1,7 @@
 import { ReactNode, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './Button';
-import { clsx } from '../utils/clsx';
+import { clsx } from '../../utils/clsx';
 
 interface ModalProps {
   isOpen: boolean;

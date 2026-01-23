@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { clsx } from '../utils/clsx';
+import { clsx } from '../../utils/clsx';
 
 interface CardProps {
   children: ReactNode;
