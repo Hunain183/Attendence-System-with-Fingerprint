@@ -46,6 +46,12 @@ export function EmployeeModal({
     hod: '',
     designation: '',
     department: '',
+    sub_department: '',
+    monthly_salary: '',
+    per_day_wage: '',
+    previous_employment: '',
+    period_from: '',
+    period_to: '',
     date_of_joining: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -66,6 +72,12 @@ export function EmployeeModal({
         hod: employee.hod || '',
         designation: employee.designation || '',
         department: employee.department || '',
+        sub_department: employee.sub_department || '',
+        monthly_salary: employee.monthly_salary || '',
+        per_day_wage: employee.per_day_wage || '',
+        previous_employment: employee.previous_employment || '',
+        period_from: employee.period_from || '',
+        period_to: employee.period_to || '',
         date_of_joining: employee.date_of_joining
           ? employee.date_of_joining.split('T')[0]
           : '',
@@ -83,6 +95,12 @@ export function EmployeeModal({
         hod: '',
         designation: '',
         department: '',
+        sub_department: '',
+        monthly_salary: '',
+        per_day_wage: '',
+        previous_employment: '',
+        period_from: '',
+        period_to: '',
         date_of_joining: '',
       });
     }
@@ -228,6 +246,13 @@ export function EmployeeModal({
             placeholder="Select department"
           />
           <Input
+            label="Sub-Department"
+            name="sub_department"
+            value={formData.sub_department}
+            onChange={handleChange}
+            placeholder="Enter sub-department"
+          />
+          <Input
             label="HOD"
             name="hod"
             value={formData.hod}
@@ -266,6 +291,50 @@ export function EmployeeModal({
           onChange={handleChange}
           placeholder="Enter current address"
         />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Monthly Salary"
+            name="monthly_salary"
+            type="number"
+            value={formData.monthly_salary}
+            onChange={handleChange}
+            placeholder="Enter monthly salary"
+          />
+          <Input
+            label="Per Day Wage"
+            name="per_day_wage"
+            type="number"
+            value={formData.per_day_wage}
+            onChange={handleChange}
+            placeholder="Enter per day wage"
+          />
+        </div>
+
+        <Input
+          label="Previous Employment"
+          name="previous_employment"
+          value={formData.previous_employment}
+          onChange={handleChange}
+          placeholder="Enter previous employment details"
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Period From"
+            name="period_from"
+            type="date"
+            value={formData.period_from}
+            onChange={handleChange}
+          />
+          <Input
+            label="Period To"
+            name="period_to"
+            type="date"
+            value={formData.period_to}
+            onChange={handleChange}
+          />
+        </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t">
           <Button

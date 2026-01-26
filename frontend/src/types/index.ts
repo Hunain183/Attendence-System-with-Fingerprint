@@ -12,6 +12,12 @@ export interface Employee {
   hod: string | null;
   designation: string | null;
   department: string | null;
+  sub_department: string | null;
+  monthly_salary: string | null;
+  per_day_wage: string | null;
+  previous_employment: string | null;
+  period_from: string | null;
+  period_to: string | null;
   date_of_joining: string | null;
   has_fingerprint: boolean;
   created_at: string;
@@ -30,6 +36,12 @@ export interface EmployeeCreate {
   hod?: string;
   designation?: string;
   department?: string;
+  sub_department?: string;
+  monthly_salary?: string;
+  per_day_wage?: string;
+  previous_employment?: string;
+  period_from?: string;
+  period_to?: string;
   date_of_joining?: string;
 }
 
