@@ -11,21 +11,21 @@ interface EmployeeModalProps {
 }
 
 const employmentTypes = [
-  { value: 'Full-time', label: 'Full-time' },
-  { value: 'Part-time', label: 'Part-time' },
-  { value: 'Contract', label: 'Contract' },
+  { value: 'Permanent', label: 'Permanent' },
+  { value: 'Temporary', label: 'Temporary' },
+  { value: 'Contractual', label: 'Contractual' },
   { value: 'Intern', label: 'Intern' },
 ];
 
 const departments = [
-  { value: 'Engineering', label: 'Engineering' },
-  { value: 'Human Resources', label: 'Human Resources' },
+  { value: 'Human Resources / Admin', label: 'Human Resources / Admin' },
   { value: 'Finance', label: 'Finance' },
   { value: 'Marketing', label: 'Marketing' },
-  { value: 'Operations', label: 'Operations' },
-  { value: 'Sales', label: 'Sales' },
+  { value: 'Export', label: 'Export' },
+  { value: 'Accounts & Audit', label: 'Accounts & Audit' },
   { value: 'IT', label: 'IT' },
-  { value: 'Administration', label: 'Administration' },
+  { value: 'Production', label: 'Production' },
+  { value: 'Electric', label: 'Electric' },
 ];
 
 export function EmployeeModal({
@@ -43,6 +43,7 @@ export function EmployeeModal({
     permanent_address: '',
     current_address: '',
     employment_type: '',
+    hod: '',
     designation: '',
     department: '',
     date_of_joining: '',
@@ -62,6 +63,7 @@ export function EmployeeModal({
         permanent_address: employee.permanent_address || '',
         current_address: employee.current_address || '',
         employment_type: employee.employment_type || '',
+        hod: employee.hod || '',
         designation: employee.designation || '',
         department: employee.department || '',
         date_of_joining: employee.date_of_joining
@@ -78,6 +80,7 @@ export function EmployeeModal({
         permanent_address: '',
         current_address: '',
         employment_type: '',
+        hod: '',
         designation: '',
         department: '',
         date_of_joining: '',
@@ -223,6 +226,13 @@ export function EmployeeModal({
             onChange={handleChange}
             options={departments}
             placeholder="Select department"
+          />
+          <Input
+            label="HOD"
+            name="hod"
+            value={formData.hod}
+            onChange={handleChange}
+            placeholder="Head of Department"
           />
           <Input
             label="Designation"

@@ -9,6 +9,7 @@ export interface Employee {
   permanent_address: string | null;
   current_address: string | null;
   employment_type: string | null;
+  hod: string | null;
   designation: string | null;
   department: string | null;
   date_of_joining: string | null;
@@ -26,6 +27,7 @@ export interface EmployeeCreate {
   permanent_address?: string;
   current_address?: string;
   employment_type?: string;
+  hod?: string;
   designation?: string;
   department?: string;
   date_of_joining?: string;
