@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import init_db
 from routers import (
     auth_router,
+    admin_users_router,
     employees_router,
     attendance_admin_router,
     attendance_device_router
@@ -71,6 +72,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router)
+app.include_router(admin_users_router)
 app.include_router(employees_router)
 app.include_router(attendance_admin_router)
 app.include_router(attendance_device_router)

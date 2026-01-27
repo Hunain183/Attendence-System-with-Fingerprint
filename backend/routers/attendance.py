@@ -7,7 +7,7 @@ from typing import Optional
 from datetime import date
 
 from database import get_db
-from auth.dependencies import get_current_admin, verify_device_api_key
+from auth.dependencies import get_current_admin, verify_device_api_key, require_roles
 from services.attendance_service import attendance_service
 from schemas.attendance import (
     AttendanceMark,
@@ -95,7 +95,7 @@ async def get_attendance(
     skip: int = Query(0, ge=0, description="Pagination offset"),
     limit: int = Query(100, ge=1, le=500, description="Max records to return"),
     db: Session = Depends(get_db),
-    admin: dict = Depends(get_current_admin)
+        admin: dict = Depends(require_roles({"primary_admin", "secondary_admin", "user"}))
 ):
     """
     Get attendance records with filters.
@@ -166,7 +166,7 @@ async def get_today_attendance(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
-    admin: dict = Depends(get_current_admin)
+        admin: dict = Depends(require_roles({"primary_admin", "secondary_admin", "user"}))
 ):
     """
     Get today's attendance records.
@@ -188,7 +188,7 @@ async def get_today_attendance(
 async def get_attendance_summary(
     target_date: date = Query(None, description="Date for summary (defaults to today)"),
     db: Session = Depends(get_db),
-    admin: dict = Depends(get_current_admin)
+        admin: dict = Depends(require_roles({"primary_admin", "secondary_admin", "user"}))
 ):
     """
     Get attendance summary for a specific date.
@@ -215,7 +215,7 @@ async def get_attendance_by_date(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
-    admin: dict = Depends(get_current_admin)
+        admin: dict = Depends(require_roles({"primary_admin", "secondary_admin", "user"}))
 ):
     """
     Get attendance records for a specific date.

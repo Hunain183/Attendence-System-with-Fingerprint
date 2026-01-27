@@ -41,5 +41,5 @@ def init_db():
     Initialize database tables.
     Called on application startup.
     """
-    from models import employee, attendance  # Import models to register them
+    from models import employee, attendance, user  # Import models to register them
     Base.metadata.create_all(bind=engine)

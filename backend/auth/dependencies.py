@@ -12,33 +12,49 @@ bearer_scheme = HTTPBearer(auto_error=True)
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
 
-async def get_current_admin(
+async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)
 ) -> dict:
-    """
-    Dependency to verify JWT token and get current admin.
-    Used for protecting admin routes.
-    
-    Args:
-        credentials: Bearer token from Authorization header
-        
-    Returns:
-        Decoded token payload with admin info
-        
-    Raises:
-        HTTPException: If token is invalid or expired
-    """
+    """Validate JWT and return payload for any authenticated user/admin."""
     token = credentials.credentials
-    
+
     payload = decode_access_token(token)
-    
+
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"}
         )
-    
+
+    return payload
+
+
+def require_roles(allowed_roles: set[str]):
+    """Dependency factory to enforce role-based access."""
+
+    async def _role_checker(payload: dict = Depends(get_current_user)) -> dict:
+        role = payload.get("role")
+        if role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions",
+            )
+        return payload
+
+    return _role_checker
+
+
+async def get_current_admin(
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)
+) -> dict:
+    """Backward-compatible admin-only dependency (primary or secondary)."""
+    payload = await get_current_user(credentials)  # type: ignore[arg-type]
+    if payload.get("role") not in {"primary_admin", "secondary_admin"}:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
     return payload
 
 

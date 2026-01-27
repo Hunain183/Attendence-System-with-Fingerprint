@@ -7,7 +7,7 @@ from typing import Optional
 import json
 
 from database import get_db
-from auth.dependencies import get_current_admin
+from auth.dependencies import get_current_admin, require_roles
 from services.employee_service import employee_service
 from schemas.employee import (
     EmployeeCreate,
@@ -37,7 +37,7 @@ async def debug_raw_request(request: Request):
 async def create_employee(
     employee_data: EmployeeCreate,
     db: Session = Depends(get_db),
-    admin: dict = Depends(get_current_admin)
+    admin: dict = Depends(require_roles({"primary_admin", "secondary_admin", "user"}))
 ):
     """
     Create a new employee.
@@ -77,7 +77,7 @@ async def list_employees(
     department: Optional[str] = Query(None, description="Filter by department"),
     search: Optional[str] = Query(None, description="Search by name or employee_no"),
     db: Session = Depends(get_db),
-    admin: dict = Depends(get_current_admin)
+    admin: dict = Depends(require_roles({"primary_admin", "secondary_admin", "user"}))
 ):
     """
     Get list of all employees with pagination.
@@ -114,7 +114,7 @@ async def list_employees(
 async def get_employee(
     employee_id: int,
     db: Session = Depends(get_db),
-    admin: dict = Depends(get_current_admin)
+    admin: dict = Depends(require_roles({"primary_admin", "secondary_admin", "user"}))
 ):
     """
     Get a single employee by ID.

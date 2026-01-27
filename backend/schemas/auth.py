@@ -15,9 +15,11 @@ class LoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int  # seconds
+    role: str
 
 
 class TokenData(BaseModel):
     """Schema for decoded token data."""
     username: str
+    role: str
     exp: int
