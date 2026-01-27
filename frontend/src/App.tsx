@@ -3,11 +3,13 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 import {
   LoginPage,
+  RegisterPage,
   DashboardPage,
   EmployeesPage,
   AttendancePage,
   ReportsPage,
   KioskPage,
+  UserManagementPage,
 } from './pages';
 
 function App() {
@@ -17,6 +19,7 @@ function App() {
       <Route path="/" element={<KioskPage />} />
       <Route path="/kiosk" element={<KioskPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
 
       {/* Protected routes - Admin panel */}
       <Route element={<ProtectedRoute />}>
@@ -25,6 +28,7 @@ function App() {
           <Route path="/employees" element={<EmployeesPage />} />
           <Route path="/attendance" element={<AttendancePage />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/users" element={<UserManagementPage />} />
         </Route>
       </Route>
 

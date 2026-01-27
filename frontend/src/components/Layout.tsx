@@ -9,6 +9,7 @@ import {
   X,
   LogOut,
   Fingerprint,
+  UserCog,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { clsx } from '../utils/clsx';
@@ -26,6 +27,18 @@ export function Layout() {
   const location = useLocation();
 
   const closeSidebar = () => setSidebarOpen(false);
+
+  // Check if user is primary admin from token
+  const authToken = localStorage.getItem('token');
+  let isPrimaryAdmin = false;
+  if (authToken) {
+    try {
+      const payload = JSON.parse(atob(authToken.split('.')[1]));
+      isPrimaryAdmin = payload.role === 'primary_admin';
+    } catch (e) {
+      // Invalid token
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -81,6 +94,26 @@ export function Layout() {
               </NavLink>
             );
           })}
+          
+          {/* Admin only section */}
+          {isPrimaryAdmin && (
+            <div className="pt-4 mt-4 border-t">
+              <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Admin</p>
+              <NavLink
+                to="/users"
+                onClick={closeSidebar}
+                className={clsx(
+                  'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors mt-2',
+                  location.pathname.startsWith('/users')
+                    ? 'bg-primary-50 text-primary-700'
+                    : 'text-gray-600 hover:bg-gray-100'
+                )}
+              >
+                <UserCog className="h-5 w-5" />
+                Users
+              </NavLink>
+            </div>
+          )}
         </nav>
 
         {/* Logout button */}

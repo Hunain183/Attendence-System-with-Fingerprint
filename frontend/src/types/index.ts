@@ -124,3 +124,23 @@ export interface EmployeeFilters {
   department?: string;
   search?: string;
 }
+
+// User Types
+export interface UserCreate {
+  username: string;
+  password: string;
+}
+
+export interface UserResponse {
+  id: number;
+  username: string;
+  role: 'user' | 'secondary_admin';
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserListResponse {
+  total: number;
+  users: UserResponse[];
+}

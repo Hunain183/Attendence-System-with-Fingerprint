@@ -1,10 +1,11 @@
 import { useState, FormEvent } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Fingerprint, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button, Input, Card } from '../../components/ui';
 
 export function LoginPage() {
+  const navigate = useNavigate();
   const { isAuthenticated, login, loading } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -24,8 +25,9 @@ export function LoginPage() {
 
     try {
       await login({ username, password });
-    } catch {
-      setError('Invalid username or password');
+    } catch (err) {
+      const errorMsg = (err as any)?.response?.data?.detail || 'Invalid username or password';
+      setError(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -97,9 +99,23 @@ export function LoginPage() {
         </form>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Fingerprint Attendance Management System
-        </p>
+        <div className="mt-8 space-y-4 border-t pt-6">
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/register')}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Create one
+              </button>
+            </p>
+          </div>
+          <p className="text-center text-xs text-gray-500">
+            Fingerprint Attendance Management System
+          </p>
+        </div>
       </Card>
     </div>
   );
