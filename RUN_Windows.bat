@@ -68,32 +68,40 @@ echo.
 
 REM Install backend dependencies
 echo Installing Backend Dependencies...
+echo    (This may take 1-2 minutes, please wait...)
 cd "%SCRIPT_DIR%backend"
 if exist "requirements.txt" (
-    pip install -q -r requirements.txt >nul 2>&1
+    pip install -r requirements.txt
     if errorlevel 1 (
+        echo.
         echo WARNING: Some backend dependencies may not have installed properly
+        echo Continuing anyway...
     ) else (
-        echo ✓ Backend dependencies installed
+        echo.
+        echo ✓ Backend dependencies installed successfully
     )
 ) else (
     echo WARNING: requirements.txt not found
 )
 
 REM Install frontend dependencies if needed
+echo.
 echo Installing Frontend Dependencies...
 cd "%SCRIPT_DIR%frontend"
 if not exist "node_modules" (
-    echo    Running: npm install (this may take 1-2 minutes)...
-    call npm install >nul 2>&1
+    echo    Running: npm install (this may take 2-3 minutes, please wait...)
+    echo.
+    call npm install
     if errorlevel 1 (
+        echo.
         echo WARNING: Some frontend dependencies may not have installed properly
         echo Continuing anyway...
     ) else (
-        echo ✓ Frontend dependencies installed
+        echo.
+        echo ✓ Frontend dependencies installed successfully
     )
 ) else (
-    echo ✓ Frontend dependencies already installed
+    echo ✓ Frontend dependencies already installed (skipping)
 )
 
 echo.
