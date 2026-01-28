@@ -68,10 +68,11 @@ echo.
 
 REM Install backend dependencies
 echo Installing Backend Dependencies...
-echo    (This may take 1-2 minutes, please wait...)
+echo    (Downloading packages - you'll see progress bars below)
+echo.
 cd "%SCRIPT_DIR%backend"
 if exist "requirements.txt" (
-    pip install -r requirements.txt
+    pip install --progress-bar on -r requirements.txt
     if errorlevel 1 (
         echo.
         echo WARNING: Some backend dependencies may not have installed properly
@@ -89,9 +90,9 @@ echo.
 echo Installing Frontend Dependencies...
 cd "%SCRIPT_DIR%frontend"
 if not exist "node_modules" (
-    echo    Running: npm install (this may take 2-3 minutes, please wait...)
+    echo    (Downloading packages - npm will show progress below)
     echo.
-    call npm install
+    call npm install --progress=true
     if errorlevel 1 (
         echo.
         echo WARNING: Some frontend dependencies may not have installed properly
