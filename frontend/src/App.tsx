@@ -10,6 +10,7 @@ import {
   ReportsPage,
   KioskPage,
   UserManagementPage,
+  ManualAttendancePage,
 } from './pages';
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/attendance" element={<AttendancePage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/users" element={<UserManagementPage />} />
+          <Route path="/manual-attendance" element={<ManualAttendancePage />} />
         </Route>
       </Route>
 

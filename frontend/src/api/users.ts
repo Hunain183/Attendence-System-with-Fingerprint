@@ -44,4 +44,14 @@ export const userApi = {
     );
     return response.data;
   },
+
+  /**
+   * Demote secondary admin to user (primary admin only)
+   */
+  demote: async (userId: number): Promise<UserResponse> => {
+    const response = await api.post<UserResponse>(
+      `/admin/users/${userId}/demote`
+    );
+    return response.data;
+  },
 };

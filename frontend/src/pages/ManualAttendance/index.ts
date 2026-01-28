@@ -1,0 +1,1 @@
+export { ManualAttendancePage } from './ManualAttendancePage';

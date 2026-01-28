@@ -12,6 +12,18 @@ export function DashboardPage() {
   const [todayAttendance, setTodayAttendance] = useState<Attendance[]>([]);
   const [totalEmployees, setTotalEmployees] = useState(0);
 
+  // Get username and role from token
+  let username = 'User';
+  let userRole = 'user';
+  const authToken = localStorage.getItem('token');
+  if (authToken) {
+    try {
+      const payload = JSON.parse(atob(authToken.split('.')[1]));
+      username = payload.sub || 'User';
+      userRole = payload.role || 'user';
+    } catch (e) {}
+  }
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -88,11 +100,20 @@ export function DashboardPage() {
   return (
     <div className="space-y-6 fade-in">
       {/* Header */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-        <p className="text-gray-500 mt-1">
-          {format(new Date(), 'EEEE, MMMM d, yyyy')}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
+          <p className="text-gray-500 mt-1">
+            {format(new Date(), 'EEEE, MMMM d, yyyy')}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-sm text-gray-500">Logged in as</p>
+          <p className="font-semibold text-gray-900">{username}</p>
+          <Badge variant={userRole === 'primary_admin' ? 'success' : userRole === 'secondary_admin' ? 'warning' : 'info'} className="mt-1">
+            {userRole === 'primary_admin' ? 'Primary Admin' : userRole === 'secondary_admin' ? 'Secondary Admin' : 'User'}
+          </Badge>
+        </div>
       </div>
 
       {/* Stats Cards */}

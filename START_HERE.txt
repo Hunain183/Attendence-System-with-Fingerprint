@@ -1,0 +1,137 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║             🎉 ATTENDANCE SYSTEM - WINDOWS LAUNCHER 🎉                   ║
+║                                                                           ║
+║                   ✨ AUTO DEPENDENCIES INCLUDED ✨                       ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 QUICK START (2 SIMPLE STEPS):
+
+  1. Install Python & Node.js (ONE-TIME ONLY):
+     
+     Python 3.8+:  https://www.python.org/downloads/
+     ✓ During installation, check "Add Python to PATH"
+     
+     Node.js 16+:  https://nodejs.org/
+     ✓ During installation, check "Add to PATH"
+     
+  2. Double-click: RUN_Windows.bat
+     That's it! Everything installs and starts automatically!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ WHAT HAPPENS AUTOMATICALLY:
+
+  ✓ Python packages install (FastAPI, SQLAlchemy, etc.)
+  ✓ Node.js packages install (React, Vite, etc.)
+  ✓ Backend server starts (port 8000)
+  ✓ Frontend server starts (port 3000)
+  ✓ Browser opens to http://localhost:3000
+  ✓ Login screen appears - ready to use!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📂 AVAILABLE LAUNCHERS:
+
+  ⭐ RUN_Windows.bat         → AUTO INSTALL & START (best choice!)
+  🔵 RUN_Windows.ps1        → PowerShell version
+  🐍 launcher.py            → Python command line version
+  📦 SETUP_DEPENDENCIES.bat  → Just install dependencies (no start)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 DEFAULT LOGIN CREDENTIALS:
+
+  Username: admin
+  Password: admin123
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 DOCUMENTATION:
+
+  For auto-dependencies info:
+    → Read: AUTO_DEPENDENCIES.md
+  
+  For quick reference:
+    → Read: QUICK_START_WINDOWS.md
+  
+  For complete setup details:
+    → Read: WINDOWS_SETUP.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ KEY FEATURES:
+
+  ✅ Auto-installs Python and Node.js dependencies
+  ✅ No manual setup needed (except Python/Node.js install)
+  ✅ Automatic server startup
+  ✅ Automatic browser launch
+  ✅ First run: 2-3 minutes (installs packages)
+  ✅ Subsequent runs: 30 seconds (already installed)
+  ✅ Works on Windows 10/11
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 USING THE APPLICATION:
+
+  Frontend: http://localhost:3000
+  Backend:  http://localhost:8000
+  API Docs: http://localhost:8000/docs
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🆘 TROUBLESHOOTING:
+
+  Problem: "Python not found"
+    → Install Python from https://www.python.org/downloads/
+    → Check "Add Python to PATH" during installation
+    → Restart Command Prompt after installation
+  
+  Problem: "Node.js not found"
+    → Install Node.js from https://nodejs.org/
+    → Check "Add to PATH" during installation
+    → Restart Command Prompt after installation
+  
+  Problem: Dependencies take long time to install
+    → This is normal on first run (2-3 minutes)
+    → Subsequent runs will be much faster
+  
+  Problem: Installation fails
+    → Run SETUP_DEPENDENCIES.bat separately first
+    → Then run RUN_Windows.bat
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛑 STOPPING THE SERVICE:
+
+  Simply close the Command Prompt windows that appear
+  or press Ctrl+C in the main launcher window
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 CREATE STANDALONE EXE (OPTIONAL):
+
+  Want to share without Python/Node.js dependency?
+  
+  Option 1: Double-click build_exe.bat
+  Option 2: Run in Command Prompt: python build_exe.py
+  
+  Wait 2-5 minutes for build to complete
+  Your standalone .exe will be at: dist\Attendance-System.exe
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎉 READY TO START?
+
+  Step 1: Install Python & Node.js (links above)
+  Step 2: Double-click: RUN_Windows.bat
+  Step 3: Done! Everything else is automatic! 🚀
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Questions? Check the documentation files for detailed instructions.
+
+Happy attendance tracking! 📊✨

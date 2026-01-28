@@ -18,7 +18,8 @@ from routers import (
     admin_users_router,
     employees_router,
     attendance_admin_router,
-    attendance_device_router
+    attendance_device_router,
+    manual_attendance_router
 )
 
 
@@ -73,6 +74,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth_router)
 app.include_router(admin_users_router)
+app.include_router(manual_attendance_router)
 app.include_router(employees_router)
 app.include_router(attendance_admin_router)
 app.include_router(attendance_device_router)

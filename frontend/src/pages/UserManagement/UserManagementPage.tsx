@@ -48,6 +48,16 @@ export function UserManagementPage() {
     }
   };
 
+  const handleDemote = async (userId: number) => {
+    try {
+      await userApi.demote(userId);
+      toast.success('User demoted to regular user');
+      loadUsers();
+    } catch (error) {
+      toast.error('Failed to demote user');
+    }
+  };
+
   const handleDeleteClick = (user: UserResponse) => {
     setSelectedUser(user);
     setShowDeleteModal(true);
@@ -198,6 +208,15 @@ export function UserManagementPage() {
                           className="text-sm"
                         >
                           Promote
+                        </Button>
+                      )}
+                      {user.role === 'secondary_admin' && (
+                        <Button
+                          onClick={() => handleDemote(user.id)}
+                          variant="secondary"
+                          className="text-sm bg-yellow-500 hover:bg-yellow-600 text-white"
+                        >
+                          Demote
                         </Button>
                       )}
                       <Button

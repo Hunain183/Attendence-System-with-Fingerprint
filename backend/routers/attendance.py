@@ -93,7 +93,7 @@ async def get_attendance(
     department: Optional[str] = Query(None, description="Filter by department"),
     employee_no: Optional[str] = Query(None, description="Filter by employee number"),
     skip: int = Query(0, ge=0, description="Pagination offset"),
-    limit: int = Query(100, ge=1, le=500, description="Max records to return"),
+    limit: int = Query(100, ge=1, le=1000, description="Max records to return"),
     db: Session = Depends(get_db),
         admin: dict = Depends(require_roles({"primary_admin", "secondary_admin", "user"}))
 ):
@@ -213,7 +213,7 @@ async def get_attendance_summary(
 async def get_attendance_by_date(
     target_date: date,
     skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=500),
+    limit: int = Query(100, ge=1, le=1000),
     db: Session = Depends(get_db),
         admin: dict = Depends(require_roles({"primary_admin", "secondary_admin", "user"}))
 ):
