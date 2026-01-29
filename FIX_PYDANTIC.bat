@@ -1,38 +1,45 @@
 @echo off
-REM Fix Pydantic Installation on Windows
-REM This uses Pydantic v1 which is pure Python (no Rust required)
+REM Check Python Version - Python 3.14 is NOT compatible!
 
 cls
 echo.
 echo ============================================================
-echo    Fixing Pydantic Installation (Pure Python - No Rust)
+echo    PYTHON VERSION CHECK
 echo ============================================================
 echo.
-echo This script installs Pydantic v1 which doesn't require Rust.
-echo.
 
-echo Step 1: Upgrading pip...
-python -m pip install --upgrade pip
-echo.
+python --version
 
-echo Step 2: Uninstalling old pydantic packages...
-pip uninstall -y pydantic pydantic-core pydantic-settings 2>nul
 echo.
-
-echo Step 3: Installing Pydantic v1 (pure Python, no Rust needed)...
-pip install pydantic==1.10.13 --force-reinstall
-echo.
-
-echo Step 4: Installing remaining dependencies...
-cd backend
-pip install --prefer-binary -r requirements.txt
-cd ..
-echo.
-
 echo ============================================================
-echo    Fix Complete!
+echo    IMPORTANT: Python 3.14 is NOT compatible!
 echo ============================================================
 echo.
-echo Now try running RUN_SIMPLE.bat again.
+echo This application requires Python 3.11 or Python 3.12
+echo.
+echo Python 3.14 is too new and packages have not been updated
+echo to support it yet.
+echo.
+echo ============================================================
+echo    HOW TO FIX:
+echo ============================================================
+echo.
+echo 1. Download Python 3.11 from:
+echo    https://www.python.org/downloads/release/python-3119/
+echo.
+echo 2. Click "Windows installer (64-bit)" at the bottom
+echo.
+echo 3. Run the installer:
+echo    - CHECK "Add Python to PATH"
+echo    - Click "Install Now"
+echo.
+echo 4. Open a NEW Command Prompt and run:
+echo    python --version
+echo.
+echo    It should show: Python 3.11.x
+echo.
+echo 5. Then run RUN_SIMPLE.bat again
+echo.
+echo ============================================================
 echo.
 pause

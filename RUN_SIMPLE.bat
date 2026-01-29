@@ -29,6 +29,30 @@ if not exist "frontend" (
 )
 
 echo Step 1: Checking Python and Node.js...
+
+REM Check Python version - must be 3.11 or 3.12
+for /f "tokens=2" %%i in ('python --version 2^>^&1') do set PYVER=%%i
+echo    Python version: %PYVER%
+
+REM Check if Python 3.14 (not compatible)
+echo %PYVER% | findstr /B "3.14" >nul
+if not errorlevel 1 (
+    echo.
+    echo ============================================================
+    echo    ERROR: Python 3.14 is NOT compatible!
+    echo ============================================================
+    echo.
+    echo This application requires Python 3.11 or 3.12
+    echo.
+    echo Please install Python 3.11 from:
+    echo    https://www.python.org/downloads/release/python-3119/
+    echo.
+    echo See INSTALL_PYTHON.txt for detailed instructions.
+    echo.
+    pause
+    exit /b 1
+)
+
 python --version >nul 2>&1
 if errorlevel 1 (
     echo ERROR: Python not found!
@@ -49,16 +73,11 @@ echo OK - Python and Node.js found
 echo.
 
 echo Step 2: Installing Backend Dependencies...
-echo    (Using Pydantic v1 - no Rust required)
 cd "%SCRIPT_DIR%backend"
 if exist "requirements.txt" (
-    REM Remove old pydantic v2 packages that require Rust
-    pip uninstall -y pydantic-core pydantic-settings 2>nul
     pip install --prefer-binary -r requirements.txt --quiet
     if errorlevel 1 (
-        echo    Trying alternative installation method...
-        pip install pydantic==1.10.13 --quiet
-        pip install --prefer-binary -r requirements.txt --quiet
+        echo    WARNING: Some dependencies may not have installed
     )
 )
 cd "%SCRIPT_DIR%"

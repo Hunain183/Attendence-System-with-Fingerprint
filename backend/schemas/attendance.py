@@ -2,7 +2,7 @@
 Pydantic schemas for Attendance.
 Handles request/response validation.
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import date, time, datetime
 
@@ -31,9 +31,7 @@ class AttendanceResponse(BaseModel):
     overtime_minutes: Optional[int] = 0
     device_id: Optional[str] = None
     created_at: datetime
-    
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AttendanceWithEmployee(BaseModel):
@@ -50,9 +48,7 @@ class AttendanceWithEmployee(BaseModel):
     overtime: bool = False
     overtime_minutes: Optional[int] = 0
     device_id: Optional[str] = None
-    
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AttendanceListResponse(BaseModel):

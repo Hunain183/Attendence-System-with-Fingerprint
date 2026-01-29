@@ -1,0 +1,52 @@
+============================================================
+   PYTHON VERSION ISSUE - PLEASE READ
+============================================================
+
+Your Python version (3.14) is too new and is not compatible 
+with FastAPI and Pydantic yet.
+
+You need to install Python 3.11 or 3.12 instead.
+
+============================================================
+   STEP-BY-STEP INSTRUCTIONS
+============================================================
+
+1. Download Python 3.11:
+   https://www.python.org/downloads/release/python-3119/
+   
+   Click on "Windows installer (64-bit)" at the bottom
+
+2. Run the installer:
+   - CHECK the box "Add Python to PATH"
+   - Click "Install Now"
+
+3. IMPORTANT: When asked "Modify, Repair, or Uninstall", 
+   choose to KEEP your Python 3.14 if you need it for other projects,
+   OR choose to uninstall it first.
+
+4. After installation, open a NEW Command Prompt and verify:
+   python --version
+   
+   It should show: Python 3.11.x
+
+5. Then run the application:
+   Double-click RUN_SIMPLE.bat
+
+============================================================
+   ALTERNATIVE: Use Python 3.12
+============================================================
+
+Python 3.12 also works:
+https://www.python.org/downloads/release/python-3128/
+
+============================================================
+   WHY THIS HAPPENS
+============================================================
+
+Python 3.14 was released very recently and many Python 
+packages (like FastAPI, Pydantic, etc.) have not been 
+updated to support it yet.
+
+Python 3.11 and 3.12 are stable and well-supported.
+
+============================================================
