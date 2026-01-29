@@ -203,11 +203,14 @@ echo.
 REM Install frontend dependencies
 echo    Installing Node.js packages (this may take 1-2 minutes)...
 cd "%SCRIPT_DIR%frontend"
-if not exist "node_modules" (
-    call npm install
-) else (
-    echo    Node modules already installed
+
+REM Always run npm install to ensure packages are installed
+call npm install
+if errorlevel 1 (
+    echo    [WARNING] npm install had issues, trying again...
+    call npm install --legacy-peer-deps
 )
+
 cd "%SCRIPT_DIR%"
 echo    [OK] Node.js packages installed
 echo.
@@ -230,10 +233,10 @@ REM Wait for backend to start
 echo Waiting 8 seconds for backend to initialize...
 timeout /t 8 /nobreak >nul
 
-REM Start frontend in a new window
+REM Start frontend in a new window using npx to ensure vite is found
 echo Starting Frontend Server on Port 3000...
 cd "%SCRIPT_DIR%frontend"
-start "Frontend - Attendance System" cmd /k "npm run dev"
+start "Frontend - Attendance System" cmd /k "npx vite --host"
 
 REM Wait for frontend to start
 echo Waiting 8 seconds for frontend to initialize...
