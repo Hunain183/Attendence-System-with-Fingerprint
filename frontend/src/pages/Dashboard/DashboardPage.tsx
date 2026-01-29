@@ -110,7 +110,7 @@ export function DashboardPage() {
         <div className="text-right">
           <p className="text-sm text-gray-500">Logged in as</p>
           <p className="font-semibold text-gray-900">{username}</p>
-          <Badge variant={userRole === 'primary_admin' ? 'success' : userRole === 'secondary_admin' ? 'warning' : 'info'} className="mt-1">
+          <Badge variant={userRole === 'primary_admin' ? 'success' : userRole === 'secondary_admin' ? 'warning' : 'info'}>
             {userRole === 'primary_admin' ? 'Primary Admin' : userRole === 'secondary_admin' ? 'Secondary Admin' : 'User'}
           </Badge>
         </div>

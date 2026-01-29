@@ -32,12 +32,10 @@ export function Layout() {
   // Check user role from token
   const authToken = localStorage.getItem('token');
   let isPrimaryAdmin = false;
-  let isUserOrSecondaryAdmin = false;
   if (authToken) {
     try {
       const payload = JSON.parse(atob(authToken.split('.')[1]));
       isPrimaryAdmin = payload.role === 'primary_admin';
-      isUserOrSecondaryAdmin = payload.role === 'user' || payload.role === 'secondary_admin';
     } catch (e) {
       // Invalid token
     }
