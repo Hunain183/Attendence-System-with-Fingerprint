@@ -72,14 +72,21 @@ class Attendance(Base):
     
     def update_overtime(self):
         """
-        Update overtime status based on total work minutes.
-        Overtime threshold: 480 minutes (8 hours).
+        Update overtime status based on total work minutes and employee shift.
+        Uses shift-based work hours (D=12h, A/B/C/G=8h).
         """
-        OVERTIME_THRESHOLD = 480
+        from utils.shifts import calculate_overtime
         
-        if self.total_work_minutes and self.total_work_minutes > OVERTIME_THRESHOLD:
-            self.overtime = True
-            self.overtime_minutes = self.total_work_minutes - OVERTIME_THRESHOLD
-        else:
+        if not self.total_work_minutes:
             self.overtime = False
             self.overtime_minutes = 0
+            return
+        
+        # Get employee's shift
+        employee_shift = self.employee.shift if self.employee else None
+        
+        # Calculate overtime based on shift
+        is_overtime, overtime_mins = calculate_overtime(self.total_work_minutes, employee_shift)
+        
+        self.overtime = is_overtime
+        self.overtime_minutes = overtime_mins

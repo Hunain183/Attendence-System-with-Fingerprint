@@ -17,6 +17,14 @@ class AttendanceMark(BaseModel):
     device_id: str = Field(..., min_length=1, max_length=100, description="Device identifier")
 
 
+class ManualAttendanceMark(BaseModel):
+    """Schema for manually marking attendance by admin."""
+    employee_no: str = Field(..., min_length=1, max_length=50, description="Employee number")
+    attendance_date: date = Field(..., description="Date to mark attendance for")
+    time_in: Optional[time] = Field(None, description="Time in")
+    time_out: Optional[time] = Field(None, description="Time out")
+
+
 # ==================== Response Schemas ====================
 
 class AttendanceResponse(BaseModel):

@@ -62,4 +62,41 @@ export const attendanceApi = {
     );
     return response.data;
   },
+
+  /**
+   * Manually mark attendance (Admin only)
+   */
+  markManual: async (data: {
+    employee_no: string;
+    attendance_date: string;
+    time_in?: string | null;
+    time_out?: string | null;
+  }) => {
+    const response = await api.post('/admin/attendance/mark', data);
+    return response;
+  },
+
+  /**
+   * Update attendance record (Primary admin only)
+   */
+  updateAttendance: async (
+    attendanceId: number,
+    data: {
+      employee_no: string;
+      attendance_date: string;
+      time_in?: string | null;
+      time_out?: string | null;
+    }
+  ) => {
+    const response = await api.put(`/admin/attendance/${attendanceId}`, data);
+    return response;
+  },
+
+  /**
+   * Delete attendance record (Primary admin only)
+   */
+  deleteAttendance: async (attendanceId: number) => {
+    const response = await api.delete(`/admin/attendance/${attendanceId}`);
+    return response;
+  },
 };

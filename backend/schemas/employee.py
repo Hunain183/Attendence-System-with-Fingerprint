@@ -14,14 +14,20 @@ class EmployeeCreate(BaseModel):
     employee_no: str = Field(..., min_length=1, max_length=50, description="Unique employee number")
     name: str = Field(..., min_length=1, max_length=100, description="Employee full name")
     father_name: Optional[str] = Field(None, max_length=100)
+    date_of_birth: Optional[datetime] = None
     cnic: Optional[str] = Field(None, max_length=15, description="CNIC format: 12345-1234567-1")
     phone_number: Optional[str] = Field(None, max_length=20)
     permanent_address: Optional[str] = None
     current_address: Optional[str] = None
+    reference_1: Optional[str] = Field(None, max_length=200)
+    reference_2: Optional[str] = Field(None, max_length=200)
+    reference_address_1: Optional[str] = None
+    reference_address_2: Optional[str] = None
     employment_type: Optional[str] = Field(None, max_length=50, description="e.g., Full-time, Part-time, Contract")
     designation: Optional[str] = Field(None, max_length=100)
     department: Optional[str] = Field(None, max_length=100)
     date_of_joining: Optional[datetime] = None
+    shift: Optional[str] = Field(None, max_length=1, description="D=12h, A/B/C/G=8h")
 
 
 class EmployeeUpdate(BaseModel):
@@ -29,14 +35,20 @@ class EmployeeUpdate(BaseModel):
     employee_no: Optional[str] = Field(None, min_length=1, max_length=50)
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     father_name: Optional[str] = Field(None, max_length=100)
+    date_of_birth: Optional[datetime] = None
     cnic: Optional[str] = Field(None, max_length=15)
     phone_number: Optional[str] = Field(None, max_length=20)
     permanent_address: Optional[str] = None
     current_address: Optional[str] = None
+    reference_1: Optional[str] = Field(None, max_length=200)
+    reference_2: Optional[str] = Field(None, max_length=200)
+    reference_address_1: Optional[str] = None
+    reference_address_2: Optional[str] = None
     employment_type: Optional[str] = Field(None, max_length=50)
     designation: Optional[str] = Field(None, max_length=100)
     department: Optional[str] = Field(None, max_length=100)
     date_of_joining: Optional[datetime] = None
+    shift: Optional[str] = Field(None, max_length=1)
 
 
 class FingerprintEnroll(BaseModel):
@@ -53,14 +65,20 @@ class EmployeeResponse(BaseModel):
     employee_no: str
     name: str
     father_name: Optional[str] = None
+    date_of_birth: Optional[datetime] = None
     cnic: Optional[str] = None
     phone_number: Optional[str] = None
     permanent_address: Optional[str] = None
     current_address: Optional[str] = None
+    reference_1: Optional[str] = None
+    reference_2: Optional[str] = None
+    reference_address_1: Optional[str] = None
+    reference_address_2: Optional[str] = None
     employment_type: Optional[str] = None
     designation: Optional[str] = None
     department: Optional[str] = None
     date_of_joining: Optional[datetime] = None
+    shift: Optional[str] = None
     has_fingerprint: bool = False  # Indicates if fingerprint is enrolled
     created_at: datetime
     updated_at: datetime

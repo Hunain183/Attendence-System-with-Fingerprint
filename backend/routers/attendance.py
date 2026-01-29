@@ -4,7 +4,7 @@ Attendance router - Admin endpoints and device endpoint for attendance.
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import Optional
-from datetime import date
+from datetime import date, time
 
 from database import get_db
 from auth.dependencies import get_current_admin, verify_device_api_key, require_roles
@@ -14,8 +14,11 @@ from schemas.attendance import (
     AttendanceMarkResponse,
     AttendanceListResponse,
     AttendanceWithEmployee,
-    DailyAttendanceSummary
+    DailyAttendanceSummary,
+    ManualAttendanceMark
 )
+from pydantic import BaseModel, Field
+
 
 # Admin router for attendance management
 admin_router = APIRouter(prefix="/admin/attendance", tags=["Attendance Management"])
@@ -82,6 +85,170 @@ async def mark_attendance(
         action=action,
         time=recorded_time
     )
+
+
+# ==================== Admin Manual Attendance ====================
+
+@admin_router.post("/mark", response_model=AttendanceMarkResponse)
+async def mark_attendance_manually(
+    mark_data: ManualAttendanceMark,
+    db: Session = Depends(get_db),
+    admin: dict = Depends(require_roles({"primary_admin"}))
+):
+    """
+    Manually mark attendance for an employee (Admin only).
+    
+    Only primary admin can use this endpoint.
+    
+    Args:
+        mark_data: Employee number, date, and times
+        
+    Returns:
+        Attendance marking result with employee info
+    """
+    from services.employee_service import employee_service
+    from models.attendance import Attendance
+    
+    # Get employee
+    employee = employee_service.get_employee_by_employee_no(db, mark_data.employee_no)
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Employee with number '{mark_data.employee_no}' not found"
+        )
+    
+    # Check if attendance already exists for this date
+    existing = db.query(Attendance).filter(
+        Attendance.employee_no == mark_data.employee_no,
+        Attendance.attendance_date == mark_data.attendance_date
+    ).first()
+    
+    if existing:
+        # Update existing record
+        if mark_data.time_in:
+            existing.time_in = mark_data.time_in
+        if mark_data.time_out:
+            existing.time_out = mark_data.time_out
+        
+        # Recalculate work minutes and overtime
+        existing.total_work_minutes = existing.calculate_work_minutes()
+        existing.update_overtime()
+        
+        db.commit()
+        db.refresh(existing)
+        
+        recorded_time = mark_data.time_out or mark_data.time_in
+        action = "updated"
+        
+    else:
+        # Create new attendance record
+        attendance = Attendance(
+            employee_no=mark_data.employee_no,
+            attendance_date=mark_data.attendance_date,
+            time_in=mark_data.time_in,
+            time_out=mark_data.time_out,
+            device_id="manual_admin"
+        )
+        
+        # Calculate work minutes and overtime
+        attendance.total_work_minutes = attendance.calculate_work_minutes()
+        attendance.update_overtime()
+        
+        db.add(attendance)
+        db.commit()
+        db.refresh(attendance)
+        
+        recorded_time = mark_data.time_out or mark_data.time_in
+        action = "created"
+    
+    return AttendanceMarkResponse(
+        success=True,
+        message=f"Attendance {action} successfully",
+        employee_no=employee.employee_no,
+        employee_name=employee.name,
+        action=action,
+        time=recorded_time
+    )
+
+
+@admin_router.put("/{attendance_id}", response_model=AttendanceMarkResponse)
+async def update_attendance(
+    attendance_id: int,
+    mark_data: ManualAttendanceMark,
+    db: Session = Depends(get_db),
+    admin: dict = Depends(require_roles({"primary_admin"}))
+):
+    """
+    Update existing attendance record (Primary admin only).
+    
+    Args:
+        attendance_id: ID of attendance record to update
+        mark_data: New attendance data
+        
+    Returns:
+        Updated attendance information
+    """
+    from models.attendance import Attendance
+    
+    # Get attendance record
+    attendance = db.query(Attendance).filter(Attendance.id == attendance_id).first()
+    if not attendance:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Attendance record not found"
+        )
+    
+    # Update fields
+    if mark_data.time_in:
+        attendance.time_in = mark_data.time_in
+    if mark_data.time_out:
+        attendance.time_out = mark_data.time_out
+    
+    # Recalculate
+    attendance.total_work_minutes = attendance.calculate_work_minutes()
+    attendance.update_overtime()
+    
+    db.commit()
+    db.refresh(attendance)
+    
+    return AttendanceMarkResponse(
+        success=True,
+        message="Attendance updated successfully",
+        employee_no=attendance.employee_no,
+        employee_name=attendance.employee.name,
+        action="updated",
+        time=mark_data.time_out or mark_data.time_in
+    )
+
+
+@admin_router.delete("/{attendance_id}")
+async def delete_attendance(
+    attendance_id: int,
+    db: Session = Depends(get_db),
+    admin: dict = Depends(require_roles({"primary_admin"}))
+):
+    """
+    Delete attendance record (Primary admin only).
+    
+    Args:
+        attendance_id: ID of record to delete
+        
+    Returns:
+        Success message
+    """
+    from models.attendance import Attendance
+    
+    attendance = db.query(Attendance).filter(Attendance.id == attendance_id).first()
+    if not attendance:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Attendance record not found"
+        )
+    
+    db.delete(attendance)
+    db.commit()
+    
+    return {"success": True, "message": "Attendance record deleted successfully"}
 
 
 # ==================== Admin Endpoints ====================

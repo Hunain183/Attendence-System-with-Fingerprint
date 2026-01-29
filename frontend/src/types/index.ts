@@ -4,21 +4,20 @@ export interface Employee {
   employee_no: string;
   name: string;
   father_name: string | null;
+  date_of_birth: string | null;
   cnic: string | null;
   phone_number: string | null;
   permanent_address: string | null;
   current_address: string | null;
+  reference_1: string | null;
+  reference_2: string | null;
+  reference_address_1: string | null;
+  reference_address_2: string | null;
   employment_type: string | null;
-  hod: string | null;
   designation: string | null;
   department: string | null;
-  sub_department: string | null;
-  monthly_salary: string | null;
-  per_day_wage: string | null;
-  previous_employment: string | null;
-  period_from: string | null;
-  period_to: string | null;
   date_of_joining: string | null;
+  shift: string | null;
   has_fingerprint: boolean;
   created_at: string;
   updated_at: string;
@@ -28,21 +27,20 @@ export interface EmployeeCreate {
   employee_no: string;
   name: string;
   father_name?: string;
+  date_of_birth?: string;
   cnic?: string;
   phone_number?: string;
   permanent_address?: string;
   current_address?: string;
+  reference_1?: string;
+  reference_2?: string;
+  reference_address_1?: string;
+  reference_address_2?: string;
   employment_type?: string;
-  hod?: string;
   designation?: string;
   department?: string;
-  sub_department?: string;
-  monthly_salary?: string;
-  per_day_wage?: string;
-  previous_employment?: string;
-  period_from?: string;
-  period_to?: string;
   date_of_joining?: string;
+  shift?: string;
 }
 
 export interface EmployeeUpdate extends Partial<EmployeeCreate> {}

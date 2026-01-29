@@ -28,6 +28,14 @@ const departments = [
   { value: 'Electric', label: 'Electric' },
 ];
 
+const shifts = [
+  { value: 'D', label: 'D - 12 Hours' },
+  { value: 'A', label: 'A - 8 Hours' },
+  { value: 'B', label: 'B - 8 Hours' },
+  { value: 'C', label: 'C - 8 Hours' },
+  { value: 'G', label: 'G - 8 Hours' },
+];
+
 export function EmployeeModal({
   isOpen,
   onClose,
@@ -38,21 +46,20 @@ export function EmployeeModal({
     employee_no: '',
     name: '',
     father_name: '',
+    date_of_birth: '',
     cnic: '',
     phone_number: '',
     permanent_address: '',
     current_address: '',
+    reference_1: '',
+    reference_2: '',
+    reference_address_1: '',
+    reference_address_2: '',
     employment_type: '',
-    hod: '',
     designation: '',
     department: '',
-    sub_department: '',
-    monthly_salary: '',
-    per_day_wage: '',
-    previous_employment: '',
-    period_from: '',
-    period_to: '',
     date_of_joining: '',
+    shift: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -64,44 +71,42 @@ export function EmployeeModal({
         employee_no: employee.employee_no,
         name: employee.name,
         father_name: employee.father_name || '',
+        date_of_birth: employee.date_of_birth ? employee.date_of_birth.split('T')[0] : '',
         cnic: employee.cnic || '',
         phone_number: employee.phone_number || '',
         permanent_address: employee.permanent_address || '',
         current_address: employee.current_address || '',
+        reference_1: employee.reference_1 || '',
+        reference_2: employee.reference_2 || '',
+        reference_address_1: employee.reference_address_1 || '',
+        reference_address_2: employee.reference_address_2 || '',
         employment_type: employee.employment_type || '',
-        hod: employee.hod || '',
         designation: employee.designation || '',
         department: employee.department || '',
-        sub_department: employee.sub_department || '',
-        monthly_salary: employee.monthly_salary || '',
-        per_day_wage: employee.per_day_wage || '',
-        previous_employment: employee.previous_employment || '',
-        period_from: employee.period_from || '',
-        period_to: employee.period_to || '',
         date_of_joining: employee.date_of_joining
           ? employee.date_of_joining.split('T')[0]
           : '',
+        shift: employee.shift || '',
       });
     } else {
       setFormData({
         employee_no: '',
         name: '',
         father_name: '',
+        date_of_birth: '',
         cnic: '',
         phone_number: '',
         permanent_address: '',
         current_address: '',
+        reference_1: '',
+        reference_2: '',
+        reference_address_1: '',
+        reference_address_2: '',
         employment_type: '',
-        hod: '',
         designation: '',
         department: '',
-        sub_department: '',
-        monthly_salary: '',
-        per_day_wage: '',
-        previous_employment: '',
-        period_from: '',
-        period_to: '',
         date_of_joining: '',
+        shift: '',
       });
     }
     setErrors({});
@@ -140,11 +145,11 @@ export function EmployeeModal({
       setLoading(true);
 
       // Clean empty strings - only include non-empty values
-      // For date_of_joining, convert to ISO format if present
+      // For dates, convert to ISO format if present
       const cleanData: Partial<EmployeeCreate> = {};
       for (const [key, value] of Object.entries(formData)) {
         if (value !== '' && value !== null && value !== undefined) {
-          if (key === 'date_of_joining' && value) {
+          if ((key === 'date_of_joining' || key === 'date_of_birth') && value) {
             // Convert date string to ISO datetime format
             cleanData[key as keyof EmployeeCreate] = `${value}T00:00:00`;
           } else {
@@ -190,6 +195,7 @@ export function EmployeeModal({
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Basic Information */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Employee No *"
@@ -216,6 +222,13 @@ export function EmployeeModal({
             placeholder="Father's name"
           />
           <Input
+            label="Date of Birth"
+            name="date_of_birth"
+            type="date"
+            value={formData.date_of_birth}
+            onChange={handleChange}
+          />
+          <Input
             label="CNIC"
             name="cnic"
             value={formData.cnic}
@@ -230,52 +243,9 @@ export function EmployeeModal({
             onChange={handleChange}
             placeholder="+92 300 1234567"
           />
-          <Input
-            label="Date of Joining"
-            name="date_of_joining"
-            type="date"
-            value={formData.date_of_joining}
-            onChange={handleChange}
-          />
-          <Select
-            label="Department"
-            name="department"
-            value={formData.department}
-            onChange={handleChange}
-            options={departments}
-            placeholder="Select department"
-          />
-          <Input
-            label="Sub-Department"
-            name="sub_department"
-            value={formData.sub_department}
-            onChange={handleChange}
-            placeholder="Enter sub-department"
-          />
-          <Input
-            label="HOD"
-            name="hod"
-            value={formData.hod}
-            onChange={handleChange}
-            placeholder="Head of Department"
-          />
-          <Input
-            label="Designation"
-            name="designation"
-            value={formData.designation}
-            onChange={handleChange}
-            placeholder="Software Engineer"
-          />
-          <Select
-            label="Employment Type"
-            name="employment_type"
-            value={formData.employment_type}
-            onChange={handleChange}
-            options={employmentTypes}
-            placeholder="Select type"
-          />
         </div>
 
+        {/* Addresses */}
         <Input
           label="Permanent Address"
           name="permanent_address"
@@ -292,48 +262,84 @@ export function EmployeeModal({
           placeholder="Enter current address"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Monthly Salary"
-            name="monthly_salary"
-            type="number"
-            value={formData.monthly_salary}
-            onChange={handleChange}
-            placeholder="Enter monthly salary"
-          />
-          <Input
-            label="Per Day Wage"
-            name="per_day_wage"
-            type="number"
-            value={formData.per_day_wage}
-            onChange={handleChange}
-            placeholder="Enter per day wage"
-          />
+        {/* References */}
+        <div className="border-t pt-4 mt-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">References</h3>
+          <div className="space-y-4">
+            <Input
+              label="Reference 1"
+              name="reference_1"
+              value={formData.reference_1}
+              onChange={handleChange}
+              placeholder="Name and contact"
+            />
+            <Input
+              label="Reference Address 1"
+              name="reference_address_1"
+              value={formData.reference_address_1}
+              onChange={handleChange}
+              placeholder="Address of reference 1"
+            />
+            <Input
+              label="Reference 2"
+              name="reference_2"
+              value={formData.reference_2}
+              onChange={handleChange}
+              placeholder="Name and contact"
+            />
+            <Input
+              label="Reference Address 2"
+              name="reference_address_2"
+              value={formData.reference_address_2}
+              onChange={handleChange}
+              placeholder="Address of reference 2"
+            />
+          </div>
         </div>
 
-        <Input
-          label="Previous Employment"
-          name="previous_employment"
-          value={formData.previous_employment}
-          onChange={handleChange}
-          placeholder="Enter previous employment details"
-        />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Period From"
-            name="period_from"
-            type="date"
-            value={formData.period_from}
-            onChange={handleChange}
-          />
-          <Input
-            label="Period To"
-            name="period_to"
-            type="date"
-            value={formData.period_to}
-            onChange={handleChange}
-          />
+        {/* Employment Details */}
+        <div className="border-t pt-4 mt-4">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">Employment Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Select
+              label="Employment Type"
+              name="employment_type"
+              value={formData.employment_type}
+              onChange={handleChange}
+              options={employmentTypes}
+              placeholder="Select type"
+            />
+            <Select
+              label="Department"
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              options={departments}
+              placeholder="Select department"
+            />
+            <Input
+              label="Designation"
+              name="designation"
+              value={formData.designation}
+              onChange={handleChange}
+              placeholder="Software Engineer"
+            />
+            <Input
+              label="Date of Joining"
+              name="date_of_joining"
+              type="date"
+              value={formData.date_of_joining}
+              onChange={handleChange}
+            />
+            <Select
+              label="Shift"
+              name="shift"
+              value={formData.shift}
+              onChange={handleChange}
+              options={shifts}
+              placeholder="Select shift"
+            />
+          </div>
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t">
