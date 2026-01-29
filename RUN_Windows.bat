@@ -111,14 +111,16 @@ echo.
 
 echo Starting Backend Server (Port 8000)...
 cd "%SCRIPT_DIR%backend"
-start "Attendance-Backend" /MIN python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+start "Attendance-Backend" cmd /k "echo Backend Server Starting... && python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload"
 
 REM Wait for backend to start
-timeout /t 3 /nobreak >nul
+echo    Waiting for backend to initialize...
+timeout /t 5 /nobreak >nul
 
+echo.
 echo Starting Frontend Server (Port 3000)...
 cd "%SCRIPT_DIR%frontend"
-start "Attendance-Frontend" /MIN cmd /c "set VITE_API_URL=/api && npm run dev"
+start "Attendance-Frontend" cmd /k "echo Frontend Server Starting... && set VITE_API_URL=/api && npm run dev"
 
 REM Wait for frontend to start
 timeout /t 5 /nobreak >nul
