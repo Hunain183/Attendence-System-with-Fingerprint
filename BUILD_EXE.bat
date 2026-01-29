@@ -146,7 +146,6 @@ pyinstaller --onefile --name "AttendanceSystem" ^
     --collect-all starlette ^
     --collect-all pydantic ^
     --collect-all sqlalchemy ^
-    --icon=NUL ^
     app_launcher.py
 
 if errorlevel 1 (
