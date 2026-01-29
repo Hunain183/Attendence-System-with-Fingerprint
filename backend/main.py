@@ -8,9 +8,13 @@ This system provides:
 - JWT authentication for admin routes
 - API key authentication for device routes
 """
+import os
+import sys
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from database import init_db
 from routers import (
@@ -21,6 +25,14 @@ from routers import (
     attendance_device_router,
     manual_attendance_router
 )
+
+# Determine base directory (works for both dev and compiled exe)
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 
 @asynccontextmanager
@@ -79,10 +91,39 @@ app.include_router(employees_router)
 app.include_router(attendance_admin_router)
 app.include_router(attendance_device_router)
 
+# Serve static frontend files if they exist (for compiled exe)
+if os.path.exists(STATIC_DIR):
+    app.mount("/assets", StaticFiles(directory=os.path.join(STATIC_DIR, "assets")), name="assets")
+    
+    @app.get("/{full_path:path}", tags=["Frontend"])
+    async def serve_frontend(full_path: str):
+        """Serve the frontend application."""
+        # Check if it's an API route or static file
+        if full_path.startswith("api/") or full_path.startswith("admin/") or full_path.startswith("device/"):
+            return {"error": "Not found"}
+        
+        # Try to serve the file from static directory
+        file_path = os.path.join(STATIC_DIR, full_path)
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        
+        # Fall back to index.html for SPA routing
+        index_path = os.path.join(STATIC_DIR, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        
+        return {"error": "Not found"}
+
 
 @app.get("/", tags=["Health"])
 async def root():
-    """Root endpoint - API health check."""
+    """Root endpoint - serves frontend or API health check."""
+    # If static files exist, serve the frontend
+    index_path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    
+    # Otherwise return API info
     return {
         "status": "healthy",
         "message": "Fingerprint Attendance Management System API",

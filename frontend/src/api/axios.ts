@@ -1,9 +1,26 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
+// Determine base URL:
+// - In development: use /api prefix (proxied by Vite)
+// - In production (compiled exe): API is on same origin, no prefix needed
+const getBaseURL = () => {
+  // If VITE_API_URL is set, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // In production mode (built), API is on same origin
+  if (import.meta.env.PROD) {
+    return '';
+  }
+  
+  // In development, use /api prefix for Vite proxy
+  return '/api';
+};
+
 // Create axios instance
-// Use /api prefix which gets proxied to backend via vite.config.ts
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
