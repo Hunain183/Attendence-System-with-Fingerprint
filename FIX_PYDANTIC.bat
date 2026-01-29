@@ -1,24 +1,26 @@
 @echo off
 REM Fix Pydantic Installation on Windows
-REM Run this if you get errors about Rust or pydantic-core
+REM This uses Pydantic v1 which is pure Python (no Rust required)
 
 cls
 echo.
 echo ============================================================
-echo    Fixing Pydantic Installation (No Rust Required)
+echo    Fixing Pydantic Installation (Pure Python - No Rust)
 echo ============================================================
+echo.
+echo This script installs Pydantic v1 which doesn't require Rust.
 echo.
 
 echo Step 1: Upgrading pip...
 python -m pip install --upgrade pip
 echo.
 
-echo Step 2: Installing pydantic-core from pre-built wheel...
-pip install pydantic-core==2.14.6 --prefer-binary --force-reinstall
+echo Step 2: Uninstalling old pydantic packages...
+pip uninstall -y pydantic pydantic-core pydantic-settings 2>nul
 echo.
 
-echo Step 3: Installing pydantic...
-pip install pydantic==2.5.3 --prefer-binary --force-reinstall
+echo Step 3: Installing Pydantic v1 (pure Python, no Rust needed)...
+pip install pydantic==1.10.13 --force-reinstall
 echo.
 
 echo Step 4: Installing remaining dependencies...

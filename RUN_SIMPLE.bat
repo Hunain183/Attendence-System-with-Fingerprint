@@ -49,13 +49,16 @@ echo OK - Python and Node.js found
 echo.
 
 echo Step 2: Installing Backend Dependencies...
-echo    (Using pre-built packages - no compilation needed)
+echo    (Using Pydantic v1 - no Rust required)
 cd "%SCRIPT_DIR%backend"
 if exist "requirements.txt" (
+    REM Remove old pydantic v2 packages that require Rust
+    pip uninstall -y pydantic-core pydantic-settings 2>nul
     pip install --prefer-binary -r requirements.txt --quiet
     if errorlevel 1 (
         echo    Trying alternative installation method...
-        pip install --only-binary :all: -r requirements.txt --quiet
+        pip install pydantic==1.10.13 --quiet
+        pip install --prefer-binary -r requirements.txt --quiet
     )
 )
 cd "%SCRIPT_DIR%"

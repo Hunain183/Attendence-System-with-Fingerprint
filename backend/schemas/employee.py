@@ -2,7 +2,7 @@
 Pydantic schemas for Employee.
 Handles request/response validation.
 """
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
@@ -65,7 +65,8 @@ class EmployeeResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        orm_mode = True
 
 
 class EmployeeListResponse(BaseModel):
@@ -81,4 +82,5 @@ class EmployeeMinimal(BaseModel):
     department: Optional[str] = None
     designation: Optional[str] = None
     
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        orm_mode = True

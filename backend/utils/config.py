@@ -2,7 +2,7 @@
 Application configuration using Pydantic Settings.
 Loads environment variables from .env file.
 """
-from pydantic_settings import BaseSettings
+from pydantic import BaseSettings
 from functools import lru_cache
 
 

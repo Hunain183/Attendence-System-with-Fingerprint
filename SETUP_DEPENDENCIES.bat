@@ -66,10 +66,17 @@ echo Installing Backend Dependencies...
 if exist "backend\requirements.txt" (
     cd backend
     echo   Running: pip install -r requirements.txt
-    pip install -q -r requirements.txt
+    echo.
+    REM First, uninstall pydantic v2 packages that might conflict
+    pip uninstall -y pydantic-core pydantic-settings 2>nul
+    REM Install requirements with prefer-binary to avoid Rust compilation
+    pip install --prefer-binary -r requirements.txt
     if errorlevel 1 (
+        echo.
         echo   WARNING: Some dependencies may not have installed properly
+        echo   Try running FIX_PYDANTIC.bat if you see Rust errors
     ) else (
+        echo.
         echo   SUCCESS: Backend dependencies installed
     )
     cd ..

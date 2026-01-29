@@ -3,7 +3,7 @@ Pydantic schemas for user accounts and admin management.
 """
 from datetime import datetime
 from typing import Literal
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 
 
 UserRole = Literal["user", "secondary_admin"]
@@ -23,7 +23,9 @@ class UserResponse(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    model_config = ConfigDict(from_attributes=True)
+    
+    class Config:
+        orm_mode = True
 
 
 class UserListResponse(BaseModel):
