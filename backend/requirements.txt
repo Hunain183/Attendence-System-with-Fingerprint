@@ -12,7 +12,9 @@ passlib==1.7.4
 bcrypt==4.0.1
 
 # Validation and Settings
+# Using pydantic v2 with pre-built binary wheels
 pydantic==2.5.3
+pydantic-core==2.14.6
 pydantic-settings==2.1.0
 python-multipart==0.0.6
 

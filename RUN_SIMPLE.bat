@@ -49,9 +49,14 @@ echo OK - Python and Node.js found
 echo.
 
 echo Step 2: Installing Backend Dependencies...
+echo    (Using pre-built packages - no compilation needed)
 cd "%SCRIPT_DIR%backend"
 if exist "requirements.txt" (
-    pip install -r requirements.txt --quiet
+    pip install --prefer-binary -r requirements.txt --quiet
+    if errorlevel 1 (
+        echo    Trying alternative installation method...
+        pip install --only-binary :all: -r requirements.txt --quiet
+    )
 )
 cd "%SCRIPT_DIR%"
 echo OK - Backend dependencies ready
