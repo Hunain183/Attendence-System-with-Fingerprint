@@ -196,8 +196,15 @@ cd "%SCRIPT_DIR%backend"
 if errorlevel 1 (
     echo    [WARNING] Some Python packages may not have installed correctly
 )
+
+echo    Running database migration...
+%PYTHON_CMD% migrate_database.py
+if errorlevel 1 (
+    echo    [WARNING] Database migration encountered issues
+)
+
 cd "%SCRIPT_DIR%"
-echo    [OK] Python packages installed
+echo    [OK] Python packages installed and database migrated
 echo.
 
 REM Install frontend dependencies

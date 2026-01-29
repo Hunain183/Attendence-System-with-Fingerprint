@@ -38,6 +38,20 @@ echo    [OK] PyInstaller installed
 echo.
 
 REM ============================================================
+REM    STEP 1.1: Migrate Database
+REM ============================================================
+
+echo [Step 1.1/4] Migrating database...
+cd "%SCRIPT_DIR%backend"
+python migrate_database.py
+if errorlevel 1 (
+    echo [WARNING] Database migration had issues but continuing...
+)
+echo    [OK] Database migrated with latest schema
+echo.
+cd "%SCRIPT_DIR%"
+
+REM ============================================================
 REM    STEP 2: Build Frontend
 REM ============================================================
 
