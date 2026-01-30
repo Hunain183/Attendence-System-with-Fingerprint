@@ -176,10 +176,13 @@ pyinstaller --onefile --name "AttendanceSystem" ^
     --hidden-import uvicorn.lifespan.on ^
     --hidden-import uvicorn.lifespan.off ^
     --hidden-import sqlalchemy.dialects.sqlite ^
+    --hidden-import passlib.handlers.bcrypt ^
     --collect-all fastapi ^
     --collect-all starlette ^
     --collect-all pydantic ^
     --collect-all sqlalchemy ^
+    --collect-all passlib ^
+    --collect-all bcrypt ^
     --console ^
     app_launcher.py
 
