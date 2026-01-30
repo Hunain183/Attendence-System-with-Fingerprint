@@ -76,9 +76,14 @@ if errorlevel 1 (
 REM Copy built files to backend static folder
 echo    Copying built files to backend...
 if not exist "%SCRIPT_DIR%backend\static" mkdir "%SCRIPT_DIR%backend\static"
-xcopy /E /Y /Q "%SCRIPT_DIR%frontend\dist\*" "%SCRIPT_DIR%backend\static\" >nul
+xcopy /E /Y /I "%SCRIPT_DIR%frontend\dist\*" "%SCRIPT_DIR%backend\static\"
+if not exist "%SCRIPT_DIR%backend\static\index.html" (
+    echo [ERROR] Frontend files not copied correctly
+    pause
+    exit /b 1
+)
 
-echo    [OK] Frontend built
+echo    [OK] Frontend built and copied
 echo.
 
 cd "%SCRIPT_DIR%"
@@ -176,7 +181,6 @@ pyinstaller --onefile --name "AttendanceSystem" ^
     --hidden-import uvicorn.lifespan.on ^
     --hidden-import uvicorn.lifespan.off ^
     --hidden-import sqlalchemy.dialects.sqlite ^
-    --hidden-import passlib.handlers.bcrypt ^
     --collect-all fastapi ^
     --collect-all starlette ^
     --collect-all pydantic ^

@@ -28,8 +28,10 @@ from routers import (
 
 # Determine base directory (works for both dev and compiled exe)
 if getattr(sys, 'frozen', False):
-    BASE_DIR = os.path.dirname(sys.executable)
+    # Running as compiled exe - use PyInstaller's temp folder
+    BASE_DIR = sys._MEIPASS
 else:
+    # Running as script
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 STATIC_DIR = os.path.join(BASE_DIR, "static")
@@ -43,6 +45,11 @@ async def lifespan(app: FastAPI):
     """
     # Startup: Initialize database tables
     print("🚀 Starting Fingerprint Attendance System...")
+    print(f"📂 Base directory: {BASE_DIR}")
+    print(f"📂 Static directory: {STATIC_DIR}")
+    print(f"📂 Static files exist: {os.path.exists(STATIC_DIR)}")
+    if os.path.exists(STATIC_DIR):
+        print(f"📂 Static files found: {os.listdir(STATIC_DIR)[:5]}")
     init_db()
     print("✅ Database initialized successfully")
     
