@@ -89,12 +89,13 @@ REM ============================================================
 
 echo [Step 3/4] Creating launcher...
 
-REM Create the main launcher Python script
+REM Create the main launcher Python script with error handling
 echo import os > "%SCRIPT_DIR%backend\app_launcher.py"
 echo import sys >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo import webbrowser >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo import threading >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo import time >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo import traceback >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo. >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo # Add the backend directory to path >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo if getattr(sys, 'frozen', False): >> "%SCRIPT_DIR%backend\app_launcher.py"
@@ -110,18 +111,35 @@ echo     time.sleep(3) >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo     webbrowser.open('http://localhost:8000') >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo. >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo if __name__ == '__main__': >> "%SCRIPT_DIR%backend\app_launcher.py"
-echo     print('Starting Attendance System...') >> "%SCRIPT_DIR%backend\app_launcher.py"
-echo     print('Opening browser to http://localhost:8000') >> "%SCRIPT_DIR%backend\app_launcher.py"
-echo     print('Press Ctrl+C to stop the server') >> "%SCRIPT_DIR%backend\app_launcher.py"
-echo     print() >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo     try: >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('='*60) >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('Attendance System - Starting...') >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('='*60) >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('Working directory:', os.getcwd()) >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('Opening browser to http://localhost:8000') >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('Press Ctrl+C to stop the server') >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('='*60) >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print() >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo. >> "%SCRIPT_DIR%backend\app_launcher.py"
-echo     # Open browser in background >> "%SCRIPT_DIR%backend\app_launcher.py"
-echo     threading.Thread(target=open_browser, daemon=True).start() >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         # Open browser in background >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         threading.Thread(target=open_browser, daemon=True).start() >> "%SCRIPT_DIR%backend\app_launcher.py"
 echo. >> "%SCRIPT_DIR%backend\app_launcher.py"
-echo     # Import and run the FastAPI app >> "%SCRIPT_DIR%backend\app_launcher.py"
-echo     import uvicorn >> "%SCRIPT_DIR%backend\app_launcher.py"
-echo     from main import app >> "%SCRIPT_DIR%backend\app_launcher.py"
-echo     uvicorn.run(app, host='127.0.0.1', port=8000) >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         # Import and run the FastAPI app >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         import uvicorn >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         from main import app >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         uvicorn.run(app, host='127.0.0.1', port=8000) >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo     except Exception as e: >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print() >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('='*60) >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('ERROR: Application failed to start') >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('='*60) >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print(str(e)) >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print() >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         traceback.print_exc() >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print() >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         print('Press any key to exit...') >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         input() >> "%SCRIPT_DIR%backend\app_launcher.py"
+echo         sys.exit(1) >> "%SCRIPT_DIR%backend\app_launcher.py"
 
 echo    [OK] Launcher created
 echo.
@@ -139,7 +157,9 @@ cd "%SCRIPT_DIR%backend"
 REM Create PyInstaller spec file for better control
 pyinstaller --onefile --name "AttendanceSystem" ^
     --add-data "static;static" ^
-    --add-data "*.py;." ^
+    --add-data "attendance.db;." ^
+    --add-data "database.py;." ^
+    --add-data "main.py;." ^
     --add-data "auth;auth" ^
     --add-data "models;models" ^
     --add-data "routers;routers" ^
@@ -160,6 +180,7 @@ pyinstaller --onefile --name "AttendanceSystem" ^
     --collect-all starlette ^
     --collect-all pydantic ^
     --collect-all sqlalchemy ^
+    --console ^
     app_launcher.py
 
 if errorlevel 1 (
