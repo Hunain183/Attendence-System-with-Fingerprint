@@ -93,16 +93,21 @@ app.include_router(attendance_device_router)
 
 # Serve static frontend files if they exist (for compiled exe)
 if os.path.exists(STATIC_DIR):
+    # Mount static assets
     app.mount("/assets", StaticFiles(directory=os.path.join(STATIC_DIR, "assets")), name="assets")
     
-    @app.get("/{full_path:path}", tags=["Frontend"])
+    @app.get("/", tags=["Frontend"])
+    async def serve_index():
+        """Serve the frontend index.html."""
+        index_path = os.path.join(STATIC_DIR, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        return {"status": "healthy", "message": "Fingerprint Attendance Management System API"}
+    
+    @app.get("/{full_path:path}", tags=["Frontend"], include_in_schema=False)
     async def serve_frontend(full_path: str):
-        """Serve the frontend application."""
-        # Check if it's an API route or static file
-        if full_path.startswith("api/") or full_path.startswith("admin/") or full_path.startswith("device/"):
-            return {"error": "Not found"}
-        
-        # Try to serve the file from static directory
+        """Serve the frontend application for SPA routing."""
+        # Try to serve the exact file from static directory
         file_path = os.path.join(STATIC_DIR, full_path)
         if os.path.exists(file_path) and os.path.isfile(file_path):
             return FileResponse(file_path)
@@ -114,22 +119,16 @@ if os.path.exists(STATIC_DIR):
         
         return {"error": "Not found"}
 
-
-@app.get("/", tags=["Health"])
-async def root():
-    """Root endpoint - serves frontend or API health check."""
-    # If static files exist, serve the frontend
-    index_path = os.path.join(STATIC_DIR, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    
-    # Otherwise return API info
-    return {
-        "status": "healthy",
-        "message": "Fingerprint Attendance Management System API",
-        "version": "1.0.0",
-        "docs": "/docs"
-    }
+else:
+    @app.get("/", tags=["Health"])
+    async def root():
+        """Root endpoint - API health check."""
+        return {
+            "status": "healthy",
+            "message": "Fingerprint Attendance Management System API",
+            "version": "1.0.0",
+            "docs": "/docs"
+        }
 
 
 @app.get("/health", tags=["Health"])
