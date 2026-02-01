@@ -91,12 +91,22 @@ app.add_middleware(
 )
 
 # Include routers
+# In production (exe), routes are at /admin, /device, /employees, etc
+# For backward compatibility with frontend expecting /api prefix, also include with /api
 app.include_router(auth_router)
 app.include_router(admin_users_router)
 app.include_router(manual_attendance_router)
 app.include_router(employees_router)
 app.include_router(attendance_admin_router)
 app.include_router(attendance_device_router)
+
+# Also include routers with /api prefix for frontend compatibility
+app.include_router(auth_router, prefix="/api")
+app.include_router(admin_users_router, prefix="/api")
+app.include_router(manual_attendance_router, prefix="/api")
+app.include_router(employees_router, prefix="/api")
+app.include_router(attendance_admin_router, prefix="/api")
+app.include_router(attendance_device_router, prefix="/api")
 
 # Serve static frontend files if they exist (for compiled exe)
 if os.path.exists(STATIC_DIR):
@@ -114,6 +124,10 @@ if os.path.exists(STATIC_DIR):
     @app.get("/{full_path:path}", tags=["Frontend"], include_in_schema=False)
     async def serve_frontend(full_path: str):
         """Serve the frontend application for SPA routing."""
+        # Don't serve API routes - let them through to the routers
+        if full_path.startswith("admin/") or full_path.startswith("device/") or full_path.startswith("api/"):
+            return {"detail": "Not found"}
+        
         # Try to serve the exact file from static directory
         file_path = os.path.join(STATIC_DIR, full_path)
         if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -124,7 +138,7 @@ if os.path.exists(STATIC_DIR):
         if os.path.exists(index_path):
             return FileResponse(index_path)
         
-        return {"error": "Not found"}
+        return {"detail": "Not found"}
 
 else:
     @app.get("/", tags=["Health"])
