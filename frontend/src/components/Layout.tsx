@@ -56,12 +56,12 @@ export function Layout() {
       {/* Sidebar */}
       <aside
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 lg:translate-x-0 flex flex-col',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-6 border-b">
+        <div className="flex items-center justify-between h-16 px-6 border-b flex-shrink-0">
           <div className="flex items-center gap-2">
             <Fingerprint className="h-8 w-8 text-primary-600" />
             <span className="font-bold text-gray-900">Attendance</span>
@@ -75,7 +75,7 @@ export function Layout() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-1">
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname.startsWith(item.path);
@@ -153,7 +153,7 @@ export function Layout() {
         </nav>
 
         {/* Logout button */}
-        <div className="p-4 border-t">
+        <div className="p-4 border-t flex-shrink-0">
           <button
             onClick={logout}
             className="flex items-center gap-3 w-full px-4 py-3 text-gray-600 rounded-lg hover:bg-gray-100 font-medium transition-colors"

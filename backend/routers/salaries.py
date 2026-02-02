@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from database import get_db
-from auth.dependencies import require_admin, require_primary_admin
+from auth.dependencies import get_current_admin, require_roles
 from schemas.salary import SalaryCreate, SalaryUpdate, SalaryResponse, SalaryCalculate
 from services import salary_service
 from models.employee import Employee
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/admin/salaries", tags=["Salary Management"])
 def create_salary(
     salary_data: SalaryCreate,
     db: Session = Depends(get_db),
-    _=Depends(require_admin)
+    _=Depends(get_current_admin)
 ):
     """
     Create a new salary record.
@@ -59,7 +59,7 @@ def create_salary(
 def calculate_salary(
     calc_data: SalaryCalculate,
     db: Session = Depends(get_db),
-    _=Depends(require_admin)
+    _=Depends(get_current_admin)
 ):
     """
     Auto-calculate salary based on attendance records.
@@ -89,7 +89,7 @@ def get_salaries(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
-    _=Depends(require_admin)
+    _=Depends(get_current_admin)
 ):
     """
     Get all salary records with optional filters.
@@ -119,7 +119,7 @@ def get_salaries(
 def get_salary(
     salary_id: int,
     db: Session = Depends(get_db),
-    _=Depends(require_admin)
+    _=Depends(get_current_admin)
 ):
     """
     Get a specific salary record by ID.
@@ -147,7 +147,7 @@ def get_employee_salaries(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
-    _=Depends(require_admin)
+    _=Depends(get_current_admin)
 ):
     """
     Get all salary records for a specific employee.
@@ -184,7 +184,7 @@ def update_salary(
     salary_id: int,
     salary_data: SalaryUpdate,
     db: Session = Depends(get_db),
-    _=Depends(require_admin)
+    _=Depends(get_current_admin)
 ):
     """
     Update a salary record.
@@ -210,7 +210,7 @@ def update_salary(
 def delete_salary(
     salary_id: int,
     db: Session = Depends(get_db),
-    _=Depends(require_primary_admin)  # Only primary admin can delete
+    _=Depends(require_roles({"primary_admin"}))  # Only primary admin can delete
 ):
     """
     Delete a salary record.
