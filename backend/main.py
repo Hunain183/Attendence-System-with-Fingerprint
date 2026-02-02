@@ -25,6 +25,7 @@ from routers import (
     attendance_device_router,
     manual_attendance_router
 )
+from routers.salaries import router as salaries_router
 
 # Determine base directory (works for both dev and compiled exe)
 if getattr(sys, 'frozen', False):
@@ -99,6 +100,7 @@ app.include_router(manual_attendance_router)
 app.include_router(employees_router)
 app.include_router(attendance_admin_router)
 app.include_router(attendance_device_router)
+app.include_router(salaries_router)
 
 # Also include routers with /api prefix for frontend compatibility
 app.include_router(auth_router, prefix="/api")
@@ -107,6 +109,7 @@ app.include_router(manual_attendance_router, prefix="/api")
 app.include_router(employees_router, prefix="/api")
 app.include_router(attendance_admin_router, prefix="/api")
 app.include_router(attendance_device_router, prefix="/api")
+app.include_router(salaries_router, prefix="/api")
 
 # Serve static frontend files if they exist (for compiled exe)
 if os.path.exists(STATIC_DIR):

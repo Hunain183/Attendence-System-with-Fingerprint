@@ -16,6 +16,12 @@ from schemas.attendance import (
     DailyAttendanceSummary
 )
 from schemas.auth import LoginRequest, LoginResponse, TokenData
+from schemas.salary import (
+    SalaryCreate,
+    SalaryUpdate,
+    SalaryResponse,
+    SalaryCalculate
+)
 
 __all__ = [
     # Employee schemas
@@ -35,5 +41,10 @@ __all__ = [
     # Auth schemas
     "LoginRequest",
     "LoginResponse",
-    "TokenData"
+    "TokenData",
+    # Salary schemas
+    "SalaryCreate",
+    "SalaryUpdate",
+    "SalaryResponse",
+    "SalaryCalculate"
 ]

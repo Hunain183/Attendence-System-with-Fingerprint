@@ -1,6 +1,6 @@
 """
-Database migration script to add new employee fields.
-Run this to update existing database with new columns.
+Database migration script to add new employee fields and salary tables.
+Run this to update existing database with new columns and tables.
 """
 import sqlite3
 import os
@@ -9,7 +9,7 @@ import os
 DB_PATH = os.path.join(os.path.dirname(__file__), 'attendance.db')
 
 def migrate_database():
-    """Add new columns to employees table."""
+    """Add new columns to employees table and create salaries table."""
     
     print(f"Migrating database: {DB_PATH}")
     
@@ -47,6 +47,34 @@ def migrate_database():
                 print(f"✗ Error adding {column_name}: {e}")
         else:
             print(f"○ Column {column_name} already exists")
+
+    # Create salaries table if it doesn't exist
+    print("\nEnsuring salaries table exists...")
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS salaries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        employee_id INTEGER NOT NULL,
+        month VARCHAR(7) NOT NULL,
+        rate_of_pay REAL NOT NULL,
+        month_days INTEGER DEFAULT 30,
+        overtime_hours REAL DEFAULT 0.0,
+        total_days_worked INTEGER DEFAULT 0,
+        amount REAL DEFAULT 0.0,
+        advance REAL DEFAULT 0.0,
+        net_amount REAL DEFAULT 0.0,
+        notes TEXT,
+        signature TEXT,
+        status VARCHAR(20) DEFAULT 'pending',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        FOREIGN KEY (employee_id) REFERENCES employees(id)
+    )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_salaries_employee_id ON salaries(employee_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_salaries_month ON salaries(month)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_salaries_status ON salaries(status)")
+    conn.commit()
+    print("✓ Salaries table ready")
     
     conn.close()
     print("\nMigration complete!")

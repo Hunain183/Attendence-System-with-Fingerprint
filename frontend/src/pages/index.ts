@@ -7,3 +7,4 @@ export { AttendancePage } from './Attendance';
 export { ReportsPage } from './Reports';
 export { KioskPage } from './Kiosk';
 export { ManualAttendancePage } from './ManualAttendance';
+export { SalaryFormPage, SalaryReportPage } from './Salary';

@@ -11,6 +11,7 @@ import {
   Fingerprint,
   UserCog,
   Clock,
+  DollarSign,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { clsx } from '../utils/clsx';
@@ -18,6 +19,7 @@ import { clsx } from '../utils/clsx';
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/employees', label: 'Employees', icon: Users },
+  { path: '/salary', label: 'Salary', icon: DollarSign },
   { path: '/attendance', label: 'Attendance', icon: ClipboardList },
   { path: '/reports', label: 'Reports', icon: FileBarChart },
 ];
@@ -111,6 +113,21 @@ export function Layout() {
             >
               <Clock className="h-5 w-5" />
               Mark Attendance
+            </NavLink>
+            
+            {/* Salary Report link */}
+            <NavLink
+              to="/salary-report"
+              onClick={closeSidebar}
+              className={clsx(
+                'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors mt-1',
+                location.pathname.startsWith('/salary-report')
+                  ? 'bg-primary-50 text-primary-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+              )}
+            >
+              <FileBarChart className="h-5 w-5" />
+              Salary Report
             </NavLink>
           </div>
           

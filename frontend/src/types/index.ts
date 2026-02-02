@@ -141,4 +141,108 @@ export interface UserResponse {
 export interface UserListResponse {
   total: number;
   users: UserResponse[];
+
+
+// Salary Types
+export interface Salary {
+  id: number;
+  employee_id: number;
+  month: string;
+  rate_of_pay: number;
+  month_days: number;
+  overtime_hours: number;
+  total_days_worked: number;
+  amount: number;
+  advance: number;
+  net_amount: number;
+  notes?: string;
+  signature?: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  employee_name?: string;
+  designation?: string;
+}
+
+export interface SalaryCreate {
+  employee_id: number;
+  month: string;
+  rate_of_pay: number;
+  month_days?: number;
+  overtime_hours?: number;
+  total_days_worked?: number;
+  advance?: number;
+  notes?: string;
+  signature?: string;
+  status?: string;
+}
+
+export interface SalaryUpdate {
+  rate_of_pay?: number;
+  month_days?: number;
+  overtime_hours?: number;
+  total_days_worked?: number;
+  advance?: number;
+  notes?: string;
+  signature?: string;
+  status?: string;
+}
+
+export interface SalaryCalculate {
+  employee_id: number;
+  month: string;
+  rate_of_pay: number;
+  advance?: number;
+}
+// Salary Types
+export interface Salary {
+  id: number;
+  employee_id: number;
+  month: string;
+  rate_of_pay: number;
+  month_days: number;
+  overtime_hours: number;
+  total_days_worked: number;
+  amount: number;
+  advance: number;
+  net_amount: number;
+  notes?: string;
+  signature?: string;
+  status: 'pending' | 'approved' | 'paid';
+  created_at: string;
+  updated_at: string;
+  employee_name?: string;
+  designation?: string;
+}
+
+export interface SalaryCreate {
+  employee_id: number;
+  month: string;
+  rate_of_pay: number;
+  month_days?: number;
+  overtime_hours?: number;
+  total_days_worked?: number;
+  advance?: number;
+  notes?: string;
+  signature?: string;
+  status?: string;
+}
+
+export interface SalaryUpdate {
+  rate_of_pay?: number;
+  month_days?: number;
+  overtime_hours?: number;
+  total_days_worked?: number;
+  advance?: number;
+  notes?: string;
+  signature?: string;
+  status?: string;
+}
+
+export interface SalaryCalculate {
+  employee_id: number;
+  month: string;
+  rate_of_pay: number;
+  advance?: number;
+}
 }

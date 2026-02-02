@@ -2,5 +2,6 @@
 from models.employee import Employee
 from models.attendance import Attendance
 from models.user import User
+from models.salary import Salary
 
-__all__ = ["Employee", "Attendance", "User"]
+__all__ = ["Employee", "Attendance", "User", "Salary"]

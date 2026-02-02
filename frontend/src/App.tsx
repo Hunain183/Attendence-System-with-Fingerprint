@@ -11,6 +11,8 @@ import {
   KioskPage,
   UserManagementPage,
   ManualAttendancePage,
+  SalaryFormPage,
+  SalaryReportPage,
 } from './pages';
 
 function App() {
@@ -31,6 +33,8 @@ function App() {
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/users" element={<UserManagementPage />} />
           <Route path="/manual-attendance" element={<ManualAttendancePage />} />
+          <Route path="/salary" element={<SalaryFormPage />} />
+          <Route path="/salary-report" element={<SalaryReportPage />} />
         </Route>
       </Route>
 
