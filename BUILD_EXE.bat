@@ -171,7 +171,7 @@ pyinstaller --onefile --name "AttendanceSystem" ^
     --collect-all passlib ^
     --collect-all bcrypt ^
     --collect-all python-jose ^
-    --console ^
+    --windowed ^
     --noconfirm ^
     app_launcher.py
 
