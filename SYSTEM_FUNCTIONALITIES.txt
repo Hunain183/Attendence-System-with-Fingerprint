@@ -1,0 +1,1266 @@
+================================================================================
+    ATTENDANCE SYSTEM WITH FINGERPRINT - COMPLETE FUNCTIONALITIES LIST
+================================================================================
+
+Version: 2.0
+Last Updated: February 3, 2026
+Platform: Web-based (React + FastAPI)
+Database: SQLite
+Authentication: JWT + API Key
+
+================================================================================
+                            TABLE OF CONTENTS
+================================================================================
+
+1. AUTHENTICATION & USER MANAGEMENT
+2. EMPLOYEE MANAGEMENT
+3. ATTENDANCE MANAGEMENT
+4. SALARY MANAGEMENT
+5. REPORTING & ANALYTICS
+6. KIOSK MODE (PUBLIC ACCESS)
+7. MANUAL ATTENDANCE MARKING
+8. DASHBOARD & OVERVIEW
+9. ADMIN CONTROLS
+10. SECURITY FEATURES
+11. DATABASE MANAGEMENT
+12. DEPLOYMENT OPTIONS
+
+================================================================================
+                    1. AUTHENTICATION & USER MANAGEMENT
+================================================================================
+
+1.1 USER LOGIN SYSTEM
+--------------------
+- Secure JWT-based authentication
+- Username and password login
+- Automatic token refresh
+- Session management
+- Role-based access control (RBAC)
+- Logout functionality
+- Protected routes
+
+1.2 USER ROLES
+--------------
+Three distinct user roles with different permissions:
+
+PRIMARY ADMIN:
+  - Full system access
+  - Can manage all users
+  - Can create/edit/delete secondary admins
+  - Can manage employees
+  - Can mark attendance manually
+  - Can generate all reports
+  - Can manage salaries
+  - Access to all features
+
+SECONDARY ADMIN:
+  - Limited administrative access
+  - Can manage employees
+  - Can view attendance records
+  - Can generate reports
+  - Can manage salaries
+  - Cannot manage other admin users
+
+USER:
+  - Read-only access
+  - Can view dashboard
+  - Can view attendance records
+  - Can view reports
+  - Cannot modify data
+
+1.3 USER MANAGEMENT (Primary Admin Only)
+-----------------------------------------
+- Create new admin users
+- Edit existing users
+- Delete users
+- View all users list
+- Assign roles (primary_admin, secondary_admin, user)
+- Username and password management
+- User activity tracking
+
+1.4 DEFAULT CREDENTIALS
+-----------------------
+- Default Admin Username: admin
+- Default Admin Password: admin123
+- Default Role: primary_admin
+- First-time setup required to change password
+
+================================================================================
+                        2. EMPLOYEE MANAGEMENT
+================================================================================
+
+2.1 EMPLOYEE REGISTRATION
+-------------------------
+Comprehensive employee data collection across 6 sections:
+
+SECTION 1: BASIC INFORMATION
+  - Employee ID (unique, auto-incremented)
+  - Employee Name (full name)
+  - CNIC (National ID number)
+  - Contact Number (phone)
+  - Email Address
+  - Department (e.g., HR, IT, Sales)
+  - Designation (job title)
+  - Date of Joining
+  - Employment Status (Active/Inactive)
+
+SECTION 2: ADDRESS DETAILS
+  - Present Address (current residence)
+  - Permanent Address (hometown/permanent residence)
+
+SECTION 3: EMPLOYMENT DETAILS
+  - HOD (Head of Department) - NEW FIELD
+  - Sub Department (specific team/unit) - NEW FIELD
+  - Reporting Manager
+  - Employment Type (Full-time, Part-time, Contract)
+  - Shift Timings
+  - Rest Day (Sunday-Saturday dropdown) - NEW FIELD
+  - Quit Date (resignation/termination date) - NEW FIELD
+  - Remarks (general notes) - NEW FIELD
+
+SECTION 4: SALARY INFORMATION
+  - Monthly Salary (PKR) - NEW FIELD
+  - Rate Per Day (PKR, calculated or manual) - NEW FIELD
+  - Payment Mode (Bank Transfer, Cash, Cheque)
+  - Bank Account Details (account number)
+
+SECTION 5: REFERENCE INFORMATION
+  - Reference 1:
+    * Name
+    * Contact Number
+    * Relationship
+  - Reference 2:
+    * Name
+    * Contact Number
+    * Relationship
+
+SECTION 6: PREVIOUS EMPLOYMENT - NEW SECTION
+  - Previous Employer Name - NEW FIELD
+  - Previous Employer Address - NEW FIELD
+  - Previous Designation - NEW FIELD
+  - Period of Service (duration at previous employer) - NEW FIELD
+
+2.2 EMPLOYEE ENROLLMENT
+-----------------------
+- Fingerprint template registration
+- Multiple fingerprint support (left/right hand)
+- Template encoding and secure storage
+- Template verification before saving
+- Device integration for fingerprint capture
+
+2.3 EMPLOYEE MANAGEMENT FEATURES
+--------------------------------
+- View all employees in table format
+- Search employees by:
+  * Name
+  * Employee ID
+  * Department
+  * CNIC
+  * Email
+- Filter employees by:
+  * Department
+  * Employment Status (Active/Inactive)
+  * Employment Type
+- Sort employees by any column
+- Pagination support
+- Edit employee details
+- Delete employees (with confirmation)
+- View complete employee profile
+- Export employee data
+
+2.4 EMPLOYEE FIELDS (Total: 30+ fields)
+---------------------------------------
+- id (auto-generated)
+- employee_id (unique identifier)
+- name
+- cnic
+- contact
+- email
+- department
+- sub_department (NEW)
+- designation
+- hod (NEW)
+- date_of_joining
+- employment_status
+- employment_type
+- present_address
+- permanent_address
+- reporting_manager
+- shift_timings
+- rest_day (NEW)
+- quit_date (NEW)
+- remarks (NEW)
+- monthly_salary (NEW)
+- rate_per_day (NEW)
+- payment_mode
+- bank_account
+- reference1_name
+- reference1_contact
+- reference1_relationship
+- reference2_name
+- reference2_contact
+- reference2_relationship
+- previous_employer (NEW)
+- previous_employer_address (NEW)
+- previous_designation (NEW)
+- previous_period_of_service (NEW)
+- fingerprint_template (encrypted)
+- created_at
+- updated_at
+
+================================================================================
+                        3. ATTENDANCE MANAGEMENT
+================================================================================
+
+3.1 FINGERPRINT-BASED ATTENDANCE
+---------------------------------
+- Real-time fingerprint scanning
+- Automatic employee identification
+- Clock In functionality
+- Clock Out functionality
+- Duplicate entry prevention
+- Device API key authentication
+- Multiple device support
+- Offline fingerprint matching
+
+3.2 ATTENDANCE TRACKING
+-----------------------
+- Date and time stamping
+- Clock-in time recording
+- Clock-out time recording
+- Working hours calculation
+- Overtime calculation
+- Break time tracking
+- Late arrival detection
+- Early departure detection
+
+3.3 ATTENDANCE STATUS
+---------------------
+- Present (clocked in and out)
+- Absent (no record)
+- Late (arrived after shift start)
+- Early Out (left before shift end)
+- Half Day (partial attendance)
+- On Leave (approved absence)
+- Holiday (scheduled off-day)
+
+3.4 ATTENDANCE VIEW (Admin)
+---------------------------
+- Daily attendance list
+- Filter by:
+  * Date range
+  * Employee name
+  * Employee ID
+  * Department
+  * Status
+- Real-time updates
+- Attendance summary cards
+- Export to CSV/Excel
+- Print attendance sheet
+
+3.5 OVERTIME MANAGEMENT
+-----------------------
+- Automatic overtime calculation
+- Configurable overtime threshold
+- Overtime hours tracking
+- Overtime pay calculation
+- Overtime approval workflow
+- Overtime reports
+
+================================================================================
+                        4. SALARY MANAGEMENT
+================================================================================
+
+4.1 SALARY CREATION
+-------------------
+- Manual salary entry
+- Employee selection from dropdown
+- Salary details:
+  * Month and Year selection
+  * Basic Salary (from employee record)
+  * Working Days (default: 26)
+  * Present Days (from attendance)
+  * Absent Days (calculated)
+  * Overtime Hours (from attendance)
+  * Overtime Amount (calculated)
+  * Bonuses (manual entry)
+  * Deductions (manual entry)
+  * Net Salary (auto-calculated)
+  
+4.2 SALARY CALCULATION
+----------------------
+Formula:
+  Base Salary = (Basic Salary / Working Days) × Present Days
+  Overtime Pay = Overtime Hours × Hourly Rate
+  Gross Salary = Base Salary + Overtime Pay + Bonuses
+  Net Salary = Gross Salary - Deductions
+
+4.3 SALARY STATUS TRACKING
+--------------------------
+Three status levels:
+  - PENDING: Salary created but not approved
+  - APPROVED: Verified by admin, ready for payment
+  - PAID: Payment completed and recorded
+
+4.4 SALARY MANAGEMENT FEATURES
+------------------------------
+- View all salary records
+- Filter by:
+  * Month
+  * Year
+  * Employee
+  * Status (Pending/Approved/Paid)
+  * Department
+- Edit salary details
+- Approve salaries (status change)
+- Mark as paid (status change)
+- Delete salary records
+- Bulk salary generation
+- Salary slip generation
+
+4.5 SALARY REPORTS
+------------------
+- Monthly salary report
+- Department-wise salary
+- Employee-wise salary history
+- Overtime payment report
+- Deductions report
+- Bonus report
+- Yearly salary summary
+- Tax calculation support
+
+================================================================================
+                    5. REPORTING & ANALYTICS
+================================================================================
+
+UNIFIED REPORTS PAGE - All reports in one place with tabbed interface
+
+5.1 ATTENDANCE REPORTS TAB
+--------------------------
+Daily Attendance Report:
+  - Select specific date
+  - View all employees attendance
+  - Shows: Employee ID, Name, Department, Clock In, Clock Out, Hours
+  - Present/Absent count
+  - Late arrivals highlighted
+  - Early departures highlighted
+  - Print functionality
+
+Monthly Attendance Report:
+  - Select month and year
+  - View entire month attendance
+  - Shows: Employee, Total Present, Total Absent, Total Late, Total Hours
+  - Department-wise summary
+  - Attendance percentage
+  - Export to Excel
+  - Print functionality
+
+5.2 SALARY REPORTS TAB
+----------------------
+Salary Report Features:
+  - Filter by month and year
+  - Filter by employee
+  - Filter by department
+  - Filter by status (Pending/Approved/Paid)
+  - Shows:
+    * Employee ID
+    * Employee Name
+    * Month/Year
+    * Basic Salary
+    * Present Days
+    * Absent Days
+    * Overtime Hours
+    * Overtime Amount
+    * Bonuses
+    * Deductions
+    * Net Salary
+    * Status
+  - Total salary calculation
+  - Print salary slips
+  - Export to Excel
+  - Print functionality
+
+5.3 EMPLOYEE REPORTS TAB
+------------------------
+Employee Details Report:
+  - Filter by department
+  - Filter by employment status
+  - Filter by employment type
+  - Shows:
+    * Employee ID
+    * Name
+    * CNIC
+    * Department
+    * Sub Department
+    * Designation
+    * HOD
+    * Contact
+    * Email
+    * Date of Joining
+    * Monthly Salary
+    * Rate Per Day
+    * Rest Day
+    * Employment Status
+  - Total employees count
+  - Active/Inactive count
+  - Department-wise distribution
+  - Export to Excel
+  - Print functionality
+
+5.4 REPORT FEATURES (All Tabs)
+------------------------------
+- Date range selection
+- Multiple filter options
+- Real-time data updates
+- Sort by any column
+- Search functionality
+- Print preview
+- Print-optimized layout
+- Export capabilities
+- Summary statistics
+- Visual indicators
+- Professional formatting
+
+================================================================================
+                    6. KIOSK MODE (PUBLIC ACCESS)
+================================================================================
+
+6.1 KIOSK INTERFACE
+-------------------
+- Public-facing attendance station
+- No login required
+- Fingerprint scanner integration
+- Large, touch-friendly interface
+- Real-time clock display
+- Company branding area
+
+6.2 KIOSK FUNCTIONALITY
+-----------------------
+- Employee fingerprint scanning
+- Automatic employee identification
+- Clock In action
+- Clock Out action
+- Success/failure notifications
+- Last attendance display
+- Welcome message with employee name
+- Working hours display
+- Shift information display
+
+6.3 KIOSK FEATURES
+------------------
+- Auto-refresh capability
+- Timeout and reset
+- Error handling and retry
+- Duplicate prevention
+- Device connection status
+- Network status indicator
+- Offline mode support
+- Audio feedback (optional)
+
+6.4 KIOSK SECURITY
+------------------
+- No data modification access
+- Read-only fingerprint verification
+- API key authentication
+- Rate limiting
+- Device whitelisting
+- Encrypted communication
+
+================================================================================
+                    7. MANUAL ATTENDANCE MARKING
+================================================================================
+
+7.1 MANUAL ATTENDANCE ENTRY (Admin Only)
+-----------------------------------------
+- Manually mark attendance for employees
+- Required when:
+  * Fingerprint device failure
+  * Employee forgot to clock in/out
+  * Retroactive attendance correction
+  * New employee without fingerprint
+  * Fingerprint not recognized
+
+7.2 MANUAL ENTRY FEATURES
+-------------------------
+- Employee selection dropdown
+- Date selection
+- Clock In time entry (manual)
+- Clock Out time entry (manual)
+- Reason for manual entry (required)
+- Admin approval requirement
+- Audit trail logging
+
+7.3 MANUAL ENTRY VALIDATION
+---------------------------
+- Duplicate entry prevention
+- Date range validation
+- Time logic validation (out > in)
+- Working hours calculation
+- Overtime calculation
+- Status assignment
+
+7.4 MANUAL ENTRY MANAGEMENT
+---------------------------
+- View all manual entries
+- Filter by employee
+- Filter by date range
+- Edit manual entries
+- Delete manual entries
+- Approval workflow
+- Export manual entries
+
+================================================================================
+                        8. DASHBOARD & OVERVIEW
+================================================================================
+
+8.1 DASHBOARD STATISTICS
+-------------------------
+Real-time overview cards:
+  - Total Employees (Active count)
+  - Present Today (Current day attendance)
+  - Absent Today (Missing attendance)
+  - Late Arrivals (Arrived after shift start)
+  - On Leave (Approved absences)
+  - Pending Salaries (Unpaid salary count)
+
+8.2 DASHBOARD CHARTS
+--------------------
+- Attendance Trend (Last 7/30 days line chart)
+- Department-wise Attendance (Pie chart)
+- Monthly Attendance Comparison (Bar chart)
+- Overtime Hours Trend (Line chart)
+- Salary Distribution (Department-wise bar chart)
+
+8.3 DASHBOARD WIDGETS
+---------------------
+- Recent Attendance (Last 10 entries)
+- Today's Attendance List (Scrollable table)
+- Upcoming Birthdays (Employee list)
+- Pending Approvals (Count and list)
+- Quick Actions (Shortcuts to common tasks)
+
+8.4 DASHBOARD REFRESH
+---------------------
+- Auto-refresh every 30 seconds
+- Manual refresh button
+- Real-time updates via WebSocket (optional)
+- Last updated timestamp
+
+================================================================================
+                        9. ADMIN CONTROLS
+================================================================================
+
+9.1 PRIMARY ADMIN EXCLUSIVE FEATURES
+-------------------------------------
+- User Management:
+  * Create new admin users
+  * Edit existing users
+  * Delete users
+  * Assign roles
+  * Reset passwords
+
+- System Settings:
+  * Configure working hours
+  * Set overtime rules
+  * Define holiday calendar
+  * Set attendance rules
+  * Configure salary calculation rules
+
+- Database Management:
+  * Backup database
+  * Restore database
+  * Database migration
+  * Data cleanup utilities
+
+9.2 SECONDARY ADMIN FEATURES
+----------------------------
+- Employee Management (Full access)
+- Attendance Viewing (Read-only)
+- Manual Attendance Marking
+- Salary Management
+- Report Generation
+- Dashboard Access
+
+9.3 ADMIN NAVIGATION
+--------------------
+Sidebar Menu:
+  - Dashboard (Overview)
+  - Employees (Employee management)
+  - Attendance (Attendance records)
+  - Salary (Salary management)
+  - Reports (Unified reports page)
+  - Users (User management - Primary Admin only)
+  - Manual Attendance (Manual entry)
+  - Settings (System configuration - Primary Admin only)
+
+9.4 ADMIN UTILITIES
+-------------------
+- Bulk Operations:
+  * Bulk employee import (CSV)
+  * Bulk salary generation
+  * Bulk attendance marking
+  * Bulk data export
+
+- Data Cleanup:
+  * Delete old attendance records
+  * Archive inactive employees
+  * Purge old salary records
+  * Database optimization
+
+================================================================================
+                        10. SECURITY FEATURES
+================================================================================
+
+10.1 AUTHENTICATION SECURITY
+----------------------------
+- JWT (JSON Web Tokens) for admin authentication
+- API Key authentication for devices
+- Password hashing (bcrypt)
+- Token expiration (configurable)
+- Token refresh mechanism
+- Session management
+- Logout on all devices option
+
+10.2 DATA SECURITY
+------------------
+- Encrypted fingerprint templates
+- HTTPS/TLS support
+- SQL injection prevention
+- XSS attack prevention
+- CSRF protection
+- Input validation and sanitization
+- Secure password storage
+
+10.3 ACCESS CONTROL
+-------------------
+- Role-based access control (RBAC)
+- Route protection
+- API endpoint authorization
+- Fine-grained permissions
+- Admin action logging
+- User activity tracking
+
+10.4 AUDIT TRAIL
+----------------
+- User login/logout logs
+- Employee CRUD operations logs
+- Attendance modification logs
+- Salary changes logs
+- Admin actions logs
+- System event logs
+- Export logs for compliance
+
+10.5 DATABASE SECURITY
+----------------------
+- SQLite database encryption (optional)
+- Regular automated backups
+- Backup verification
+- Point-in-time recovery
+- Database file permissions
+- Secure connection strings
+
+================================================================================
+                        11. DATABASE MANAGEMENT
+================================================================================
+
+11.1 DATABASE SCHEMA
+--------------------
+Tables:
+  1. employees (30+ columns)
+  2. attendance (clock in/out records)
+  3. salaries (salary calculations)
+  4. users (admin users)
+  5. audit_logs (activity tracking)
+  6. system_settings (configuration)
+
+11.2 DATABASE FEATURES
+----------------------
+- SQLite database (file-based)
+- Automatic schema migration
+- Backup and restore utilities
+- Data integrity constraints
+- Foreign key relationships
+- Indexes for performance
+- Transaction support
+
+11.3 MIGRATION SYSTEM
+---------------------
+- migrate_database.py script
+- Automatic column addition
+- Safe migration (preserves data)
+- Migration history tracking
+- Rollback support (manual)
+- Pre-migration backup
+
+11.4 DATABASE BACKUP
+--------------------
+- Manual backup option
+- Scheduled automatic backups
+- Backup to local directory
+- Cloud backup support (configurable)
+- Backup compression
+- Backup retention policy
+
+================================================================================
+                        12. DEPLOYMENT OPTIONS
+================================================================================
+
+12.1 DEVELOPMENT MODE
+---------------------
+Components:
+  - Backend: Python FastAPI (port 8000)
+  - Frontend: React + Vite (port 3000/3001)
+  - Database: SQLite (attendance.db)
+
+Batch Files:
+  - INSTALL_AND_RUN.bat: Auto-install Python/Node.js and run
+  - START.bat: Start backend and frontend servers
+  - STOP_App.bat: Stop all running processes
+
+12.2 PRODUCTION EXECUTABLE
+--------------------------
+Single Executable Deployment:
+  - File: AttendanceSystem.exe
+  - Size: ~100-150 MB
+  - Includes: Python runtime, all dependencies, React frontend
+  - No installation required on target PC
+  - Portable and standalone
+
+Build Process:
+  - BUILD_EXE.bat creates executable
+  - PyInstaller compilation
+  - Frontend build and bundling
+  - Static files inclusion
+  - Database migration
+  - Build time: 5-10 minutes
+
+12.3 DEPLOYMENT FEATURES
+------------------------
+- Single-file executable
+- No Python/Node.js required on target
+- Auto-opens browser on startup
+- Database auto-creation
+- Default admin account creation
+- Port 8000 for backend API
+- Embedded frontend (no separate server)
+
+12.4 SYSTEM REQUIREMENTS
+------------------------
+Development:
+  - Windows 10/11 (or Linux with Wine)
+  - Python 3.11 or 3.12
+  - Node.js 20 LTS or higher
+  - 2 GB RAM minimum
+  - 1 GB disk space
+
+Production (Executable):
+  - Windows 10/11
+  - 1 GB RAM minimum
+  - 200 MB disk space
+  - No Python or Node.js required
+
+12.5 BROWSER COMPATIBILITY
+--------------------------
+- Google Chrome (Recommended)
+- Microsoft Edge
+- Mozilla Firefox
+- Safari (Limited support)
+- Any modern browser with JavaScript enabled
+
+================================================================================
+                        ADDITIONAL FEATURES
+================================================================================
+
+13.1 USER INTERFACE
+-------------------
+- Modern, clean design
+- Responsive layout (desktop, tablet, mobile)
+- Tailwind CSS styling
+- Lucide React icons
+- Loading states and spinners
+- Error messages and notifications
+- Success confirmations
+- Modal dialogs
+- Dropdown menus
+- Date pickers
+- Form validation feedback
+- Toast notifications
+
+13.2 DATA EXPORT
+----------------
+- Export to CSV
+- Export to Excel
+- PDF generation (reports)
+- Print preview
+- Custom date ranges
+- Filtered data export
+- Formatted reports
+
+13.3 SEARCH & FILTER
+--------------------
+- Global search across entities
+- Column-specific search
+- Multi-criteria filtering
+- Date range filtering
+- Status filtering
+- Department filtering
+- Real-time search results
+
+13.4 VALIDATION
+---------------
+- Client-side validation (React)
+- Server-side validation (FastAPI)
+- Pydantic schema validation
+- TypeScript type checking
+- Required field validation
+- Format validation (email, phone, CNIC)
+- Date validation
+- Numeric validation
+
+13.5 PERFORMANCE
+----------------
+- Fast API response times (<100ms)
+- Optimized database queries
+- Frontend code splitting
+- Lazy loading of routes
+- Caching strategies
+- Minimal bundle size
+- Efficient re-renders
+
+================================================================================
+                        ADVANCED FUNCTIONALITIES
+================================================================================
+
+14.1 NOTIFICATION SYSTEM (Future Enhancement)
+----------------------------------------------
+- Email notifications
+- SMS alerts
+- In-app notifications
+- Late arrival alerts
+- Absence notifications
+- Salary approval notifications
+- System announcements
+
+14.2 LEAVE MANAGEMENT (Future Enhancement)
+------------------------------------------
+- Leave request submission
+- Leave approval workflow
+- Leave balance tracking
+- Leave types (Sick, Casual, Annual)
+- Leave calendar
+- Leave reports
+
+14.3 SHIFT MANAGEMENT (Future Enhancement)
+------------------------------------------
+- Multiple shift support
+- Shift scheduling
+- Shift rotation
+- Shift swapping
+- Shift reports
+
+14.4 BIOMETRIC DEVICE INTEGRATION
+----------------------------------
+Current Support:
+  - Fingerprint scanners
+  - RESTful API integration
+  - Device authentication via API key
+  - Real-time data sync
+
+Future Support:
+  - Face recognition
+  - RFID cards
+  - QR code scanning
+  - Mobile app scanning
+
+14.5 REPORTING ENHANCEMENTS
+---------------------------
+- Custom report builder
+- Scheduled reports
+- Email report delivery
+- Report templates
+- Graphical dashboards
+- Trend analysis
+- Predictive analytics
+
+================================================================================
+                        TECHNICAL SPECIFICATIONS
+================================================================================
+
+15.1 BACKEND STACK
+------------------
+- Language: Python 3.11/3.12
+- Framework: FastAPI 0.100+
+- ORM: SQLAlchemy 2.0+
+- Validation: Pydantic v2
+- Database: SQLite 3
+- Authentication: PyJWT
+- Password Hashing: passlib with bcrypt
+- CORS: FastAPI middleware
+
+15.2 FRONTEND STACK
+-------------------
+- Language: TypeScript 5.0+
+- Framework: React 18
+- Build Tool: Vite 5
+- Routing: React Router DOM v6
+- Styling: Tailwind CSS 3
+- Icons: Lucide React
+- HTTP Client: Axios
+- State Management: React Context API
+
+15.3 API ENDPOINTS
+------------------
+Authentication:
+  POST /auth/register - Register new user
+  POST /auth/login - Login user
+  POST /auth/logout - Logout user
+
+Users:
+  GET /users - List all users
+  POST /users - Create user
+  GET /users/{id} - Get user details
+  PUT /users/{id} - Update user
+  DELETE /users/{id} - Delete user
+
+Employees:
+  GET /employees - List all employees
+  POST /employees - Create employee
+  GET /employees/{id} - Get employee details
+  PUT /employees/{id} - Update employee
+  DELETE /employees/{id} - Delete employee
+  POST /employees/{id}/fingerprint - Enroll fingerprint
+
+Attendance:
+  GET /attendance - List attendance records
+  POST /attendance/clock-in - Clock in (device)
+  POST /attendance/clock-out - Clock out (device)
+  POST /attendance/manual - Manual attendance entry
+  GET /attendance/report - Generate reports
+
+Salaries:
+  GET /salaries - List all salaries
+  POST /salaries - Create salary record
+  GET /salaries/{id} - Get salary details
+  PUT /salaries/{id} - Update salary
+  DELETE /salaries/{id} - Delete salary
+  PUT /salaries/{id}/approve - Approve salary
+  PUT /salaries/{id}/pay - Mark as paid
+
+15.4 DATABASE COLUMNS
+---------------------
+Employees Table (31 columns):
+  - id (INTEGER PRIMARY KEY)
+  - employee_id (TEXT UNIQUE)
+  - name (TEXT)
+  - cnic (TEXT)
+  - contact (TEXT)
+  - email (TEXT)
+  - department (TEXT)
+  - sub_department (TEXT)
+  - designation (TEXT)
+  - hod (TEXT)
+  - date_of_joining (TEXT)
+  - employment_status (TEXT)
+  - employment_type (TEXT)
+  - present_address (TEXT)
+  - permanent_address (TEXT)
+  - reporting_manager (TEXT)
+  - shift_timings (TEXT)
+  - rest_day (TEXT)
+  - quit_date (TEXT)
+  - remarks (TEXT)
+  - monthly_salary (REAL)
+  - rate_per_day (REAL)
+  - payment_mode (TEXT)
+  - bank_account (TEXT)
+  - reference1_name (TEXT)
+  - reference1_contact (TEXT)
+  - reference1_relationship (TEXT)
+  - reference2_name (TEXT)
+  - reference2_contact (TEXT)
+  - reference2_relationship (TEXT)
+  - previous_employer (TEXT)
+  - previous_employer_address (TEXT)
+  - previous_designation (TEXT)
+  - previous_period_of_service (TEXT)
+  - fingerprint_template (TEXT)
+  - created_at (DATETIME)
+  - updated_at (DATETIME)
+
+Attendance Table:
+  - id (INTEGER PRIMARY KEY)
+  - employee_id (INTEGER FOREIGN KEY)
+  - date (TEXT)
+  - clock_in (TEXT)
+  - clock_out (TEXT)
+  - working_hours (REAL)
+  - overtime_hours (REAL)
+  - status (TEXT)
+  - is_manual (BOOLEAN)
+  - manual_reason (TEXT)
+  - created_at (DATETIME)
+  - updated_at (DATETIME)
+
+Salaries Table:
+  - id (INTEGER PRIMARY KEY)
+  - employee_id (INTEGER FOREIGN KEY)
+  - month (INTEGER)
+  - year (INTEGER)
+  - basic_salary (REAL)
+  - working_days (INTEGER)
+  - present_days (INTEGER)
+  - absent_days (INTEGER)
+  - overtime_hours (REAL)
+  - overtime_amount (REAL)
+  - bonuses (REAL)
+  - deductions (REAL)
+  - net_salary (REAL)
+  - status (TEXT)
+  - created_at (DATETIME)
+  - updated_at (DATETIME)
+
+Users Table:
+  - id (INTEGER PRIMARY KEY)
+  - username (TEXT UNIQUE)
+  - password_hash (TEXT)
+  - role (TEXT)
+  - created_at (DATETIME)
+  - updated_at (DATETIME)
+
+================================================================================
+                        FILE STRUCTURE
+================================================================================
+
+backend/
+  - main.py (FastAPI application)
+  - database.py (Database connection)
+  - app_launcher.py (Executable entry point)
+  - migrate_database.py (Database migration)
+  - requirements.txt (Python dependencies)
+  - attendance.db (SQLite database)
+  
+  auth/
+    - jwt_handler.py (JWT token handling)
+    - dependencies.py (Auth dependencies)
+  
+  models/
+    - employee.py (Employee ORM model)
+    - attendance.py (Attendance ORM model)
+    - __init__.py
+  
+  schemas/
+    - employee.py (Employee Pydantic schemas)
+    - attendance.py (Attendance Pydantic schemas)
+    - auth.py (Auth Pydantic schemas)
+    - __init__.py
+  
+  routers/
+    - employees.py (Employee endpoints)
+    - attendance.py (Attendance endpoints)
+    - auth.py (Auth endpoints)
+    - salaries.py (Salary endpoints)
+    - __init__.py
+  
+  services/
+    - employee_service.py (Employee business logic)
+    - attendance_service.py (Attendance business logic)
+    - __init__.py
+  
+  utils/
+    - config.py (Configuration settings)
+    - encryption.py (Data encryption utilities)
+    - __init__.py
+
+frontend/
+  - index.html (Entry HTML)
+  - package.json (Dependencies)
+  - vite.config.ts (Vite configuration)
+  - tailwind.config.js (Tailwind configuration)
+  - tsconfig.json (TypeScript configuration)
+  
+  src/
+    - main.tsx (React entry point)
+    - App.tsx (Main routing)
+    - index.css (Global styles)
+    
+    api/
+      - axios.ts (HTTP client setup)
+      - auth.ts (Auth API calls)
+      - employees.ts (Employee API calls)
+      - attendance.ts (Attendance API calls)
+      - index.ts
+    
+    components/
+      - Layout.tsx (Main layout with sidebar)
+      - ProtectedRoute.tsx (Route protection)
+      
+      ui/
+        - Button.tsx
+        - Input.tsx
+        - Card.tsx
+        - Table.tsx
+        - Modal.tsx
+        - Select.tsx
+        - Badge.tsx
+    
+    pages/
+      - Dashboard/DashboardPage.tsx
+      - Employees/EmployeesPage.tsx
+      - Employees/EmployeeModal.tsx
+      - Employees/FingerprintModal.tsx
+      - Attendance/AttendancePage.tsx
+      - Reports/UnifiedReportsPage.tsx
+      - Reports/tabs/AttendanceReports.tsx
+      - Reports/tabs/SalaryReports.tsx
+      - Reports/tabs/EmployeeReports.tsx
+      - Kiosk/KioskPage.tsx
+      - Login/LoginPage.tsx
+    
+    context/
+      - AuthContext.tsx (Authentication state)
+    
+    types/
+      - index.ts (TypeScript type definitions)
+    
+    utils/
+      - clsx.ts (Class name utility)
+
+Batch Files (Windows):
+  - INSTALL_AND_RUN.bat
+  - START.bat
+  - STOP_App.bat
+  - BUILD_EXE.bat
+  - CHECK_SETUP.bat
+
+Documentation:
+  - DEPLOYMENT_GUIDE.md
+  - BUILD_READY.md
+  - BATCH_FILES_GUIDE.md
+  - SYSTEM_FUNCTIONALITIES.txt (this file)
+
+================================================================================
+                        KEY WORKFLOWS
+================================================================================
+
+16.1 NEW EMPLOYEE ONBOARDING
+----------------------------
+1. Admin logs into system
+2. Navigate to Employees page
+3. Click "Add Employee" button
+4. Fill employee form (6 sections):
+   - Basic Information (name, CNIC, contact, etc.)
+   - Address Details
+   - Employment Details (department, designation, HOD, etc.)
+   - Salary Information (monthly salary, rate per day)
+   - Reference Information (2 references)
+   - Previous Employment details
+5. Click "Save Employee"
+6. Click "Enroll Fingerprint" on employee row
+7. Scan employee fingerprint using device
+8. Confirm and save fingerprint template
+9. Employee can now use kiosk for attendance
+
+16.2 DAILY ATTENDANCE MARKING
+-----------------------------
+OPTION 1: Fingerprint (Kiosk Mode)
+1. Employee goes to kiosk station
+2. Places finger on scanner
+3. System identifies employee
+4. Displays welcome message
+5. Records clock in/out time
+6. Shows confirmation
+
+OPTION 2: Manual Entry (Admin)
+1. Admin navigates to Manual Attendance
+2. Selects employee from dropdown
+3. Selects date
+4. Enters clock in time
+5. Enters clock out time
+6. Provides reason for manual entry
+7. Saves attendance record
+
+16.3 MONTHLY SALARY PROCESSING
+------------------------------
+1. Admin navigates to Salary page
+2. Clicks "Add Salary" button
+3. Selects employee
+4. Selects month and year
+5. System auto-fills:
+   - Basic salary (from employee record)
+   - Present days (from attendance)
+   - Absent days (calculated)
+   - Overtime hours (from attendance)
+6. Admin enters:
+   - Bonuses (if any)
+   - Deductions (if any)
+7. System calculates net salary
+8. Saves salary record with status "Pending"
+9. Primary admin reviews and approves
+10. Status changes to "Approved"
+11. After payment, mark as "Paid"
+
+16.4 GENERATING REPORTS
+-----------------------
+1. Admin navigates to Reports page
+2. Selects desired tab:
+   - Attendance Reports
+   - Salary Reports
+   - Employee Reports
+3. Applies filters:
+   - Date range
+   - Department
+   - Employee
+   - Status
+4. Views results in table
+5. Options:
+   - Print report
+   - Export to Excel
+   - Export to CSV
+6. Click Print for formatted output
+
+================================================================================
+                        CONCLUSION
+================================================================================
+
+This Attendance System with Fingerprint is a comprehensive solution for:
+- Employee information management (30+ fields per employee)
+- Biometric attendance tracking (fingerprint-based)
+- Salary calculation and management
+- Comprehensive reporting and analytics
+- Multi-user access with role-based permissions
+- Manual attendance marking capabilities
+- Unified reports interface for all analytics
+
+The system is designed for:
+- Small to medium-sized organizations
+- Companies requiring biometric attendance
+- HR departments needing salary automation
+- Businesses with multiple departments
+- Organizations requiring detailed employee records
+
+Deployment Options:
+- Development mode (Python + Node.js)
+- Production executable (standalone .exe file)
+- No installation required for end users
+- Works on Windows 10/11
+
+Security Features:
+- JWT authentication
+- Encrypted fingerprint templates
+- Role-based access control
+- Password hashing
+- API key authentication for devices
+
+Latest Updates (Version 2.0):
+- 11 new employee fields added
+- Unified reports page with 3 tabs
+- Enhanced employee form with 6 sections
+- Improved salary management
+- Better reporting capabilities
+- Complete database migration support
+
+Total Functionalities Count: 100+ distinct features
+
+================================================================================
+                            END OF DOCUMENT
+================================================================================
