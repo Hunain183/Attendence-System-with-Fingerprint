@@ -40,8 +40,23 @@ class Employee(Base):
     employment_type = Column(String(50), nullable=True)  # e.g., Full-time, Part-time, Contract
     designation = Column(String(100), nullable=True)
     department = Column(String(100), nullable=True)
+    hod = Column(String(100), nullable=True)  # Head of Department
+    sub_department = Column(String(100), nullable=True)
     date_of_joining = Column(DateTime, nullable=True)
     shift = Column(String(1), nullable=True)  # D=12h, A/B/C/G=8h
+    rest_day = Column(String(50), nullable=True)  # e.g., Friday, Saturday
+    quit_date = Column(DateTime, nullable=True)
+    remarks = Column(Text, nullable=True)
+    
+    # Salary details
+    monthly_salary = Column(Integer, nullable=True)  # in rupees
+    rate_per_day = Column(Integer, nullable=True)  # calculated: monthly_salary / days_in_month
+    
+    # Previous employment
+    previous_employer = Column(String(200), nullable=True)
+    previous_employer_address = Column(Text, nullable=True)
+    previous_designation = Column(String(100), nullable=True)
+    previous_period_of_service = Column(String(200), nullable=True)  # e.g., "Jan 2020 - Dec 2022"
     
     # Fingerprint template (encrypted)
     fingerprint_template = Column(Text, nullable=True)

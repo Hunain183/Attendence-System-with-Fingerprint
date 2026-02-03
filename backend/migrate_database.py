@@ -28,6 +28,17 @@ def migrate_database():
         ("reference_address_1", "TEXT"),
         ("reference_address_2", "TEXT"),
         ("shift", "VARCHAR(1)"),
+        ("hod", "VARCHAR(100)"),
+        ("sub_department", "VARCHAR(100)"),
+        ("rest_day", "VARCHAR(50)"),
+        ("quit_date", "DATETIME"),
+        ("remarks", "TEXT"),
+        ("monthly_salary", "INTEGER"),
+        ("rate_per_day", "INTEGER"),
+        ("previous_employer", "VARCHAR(200)"),
+        ("previous_employer_address", "TEXT"),
+        ("previous_designation", "VARCHAR(100)"),
+        ("previous_period_of_service", "VARCHAR(200)"),
     ]
     
     # Get existing columns

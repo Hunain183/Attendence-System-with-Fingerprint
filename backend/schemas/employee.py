@@ -19,15 +19,26 @@ class EmployeeCreate(BaseModel):
     phone_number: Optional[str] = Field(None, max_length=20)
     permanent_address: Optional[str] = None
     current_address: Optional[str] = None
+    employment_type: Optional[str] = Field(None, max_length=50, description="e.g., Full-time, Part-time, Contract")
+    designation: Optional[str] = Field(None, max_length=100)
+    department: Optional[str] = Field(None, max_length=100)
+    hod: Optional[str] = Field(None, max_length=100, description="Head of Department")
+    sub_department: Optional[str] = Field(None, max_length=100)
+    date_of_joining: Optional[datetime] = None
+    shift: Optional[str] = Field(None, max_length=1, description="D=12h, A/B/C/G=8h")
+    rest_day: Optional[str] = Field(None, max_length=50, description="e.g., Friday, Saturday")
+    quit_date: Optional[datetime] = None
+    remarks: Optional[str] = None
+    monthly_salary: Optional[int] = Field(None, description="Monthly salary in rupees")
+    rate_per_day: Optional[int] = Field(None, description="Rate per day (auto-calculated)")
     reference_1: Optional[str] = Field(None, max_length=200)
     reference_2: Optional[str] = Field(None, max_length=200)
     reference_address_1: Optional[str] = None
     reference_address_2: Optional[str] = None
-    employment_type: Optional[str] = Field(None, max_length=50, description="e.g., Full-time, Part-time, Contract")
-    designation: Optional[str] = Field(None, max_length=100)
-    department: Optional[str] = Field(None, max_length=100)
-    date_of_joining: Optional[datetime] = None
-    shift: Optional[str] = Field(None, max_length=1, description="D=12h, A/B/C/G=8h")
+    previous_employer: Optional[str] = Field(None, max_length=200)
+    previous_employer_address: Optional[str] = None
+    previous_designation: Optional[str] = Field(None, max_length=100)
+    previous_period_of_service: Optional[str] = Field(None, max_length=200)
 
 
 class EmployeeUpdate(BaseModel):
@@ -40,15 +51,26 @@ class EmployeeUpdate(BaseModel):
     phone_number: Optional[str] = Field(None, max_length=20)
     permanent_address: Optional[str] = None
     current_address: Optional[str] = None
+    employment_type: Optional[str] = Field(None, max_length=50)
+    designation: Optional[str] = Field(None, max_length=100)
+    department: Optional[str] = Field(None, max_length=100)
+    hod: Optional[str] = Field(None, max_length=100)
+    sub_department: Optional[str] = Field(None, max_length=100)
+    date_of_joining: Optional[datetime] = None
+    shift: Optional[str] = Field(None, max_length=1)
+    rest_day: Optional[str] = Field(None, max_length=50)
+    quit_date: Optional[datetime] = None
+    remarks: Optional[str] = None
+    monthly_salary: Optional[int] = None
+    rate_per_day: Optional[int] = None
     reference_1: Optional[str] = Field(None, max_length=200)
     reference_2: Optional[str] = Field(None, max_length=200)
     reference_address_1: Optional[str] = None
     reference_address_2: Optional[str] = None
-    employment_type: Optional[str] = Field(None, max_length=50)
-    designation: Optional[str] = Field(None, max_length=100)
-    department: Optional[str] = Field(None, max_length=100)
-    date_of_joining: Optional[datetime] = None
-    shift: Optional[str] = Field(None, max_length=1)
+    previous_employer: Optional[str] = Field(None, max_length=200)
+    previous_employer_address: Optional[str] = None
+    previous_designation: Optional[str] = Field(None, max_length=100)
+    previous_period_of_service: Optional[str] = Field(None, max_length=200)
 
 
 class FingerprintEnroll(BaseModel):
@@ -70,15 +92,26 @@ class EmployeeResponse(BaseModel):
     phone_number: Optional[str] = None
     permanent_address: Optional[str] = None
     current_address: Optional[str] = None
+    employment_type: Optional[str] = None
+    designation: Optional[str] = None
+    department: Optional[str] = None
+    hod: Optional[str] = None
+    sub_department: Optional[str] = None
+    date_of_joining: Optional[datetime] = None
+    shift: Optional[str] = None
+    rest_day: Optional[str] = None
+    quit_date: Optional[datetime] = None
+    remarks: Optional[str] = None
+    monthly_salary: Optional[int] = None
+    rate_per_day: Optional[int] = None
     reference_1: Optional[str] = None
     reference_2: Optional[str] = None
     reference_address_1: Optional[str] = None
     reference_address_2: Optional[str] = None
-    employment_type: Optional[str] = None
-    designation: Optional[str] = None
-    department: Optional[str] = None
-    date_of_joining: Optional[datetime] = None
-    shift: Optional[str] = None
+    previous_employer: Optional[str] = None
+    previous_employer_address: Optional[str] = None
+    previous_designation: Optional[str] = None
+    previous_period_of_service: Optional[str] = None
     has_fingerprint: bool = False  # Indicates if fingerprint is enrolled
     created_at: datetime
     updated_at: datetime

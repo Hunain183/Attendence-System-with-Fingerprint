@@ -7,13 +7,11 @@ import {
   DashboardPage,
   EmployeesPage,
   AttendancePage,
-  ReportsPage,
+  UnifiedReportsPage,
   KioskPage,
   UserManagementPage,
   ManualAttendancePage,
   SalaryFormPage,
-  SalaryReportPage,
-  EmployeeReportPage,
 } from './pages';
 
 function App() {
@@ -31,12 +29,10 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/employees" element={<EmployeesPage />} />
           <Route path="/attendance" element={<AttendancePage />} />
-          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/reports" element={<UnifiedReportsPage />} />
           <Route path="/users" element={<UserManagementPage />} />
           <Route path="/manual-attendance" element={<ManualAttendancePage />} />
           <Route path="/salary" element={<SalaryFormPage />} />
-          <Route path="/salary-report" element={<SalaryReportPage />} />
-          <Route path="/employee-report" element={<EmployeeReportPage />} />
         </Route>
       </Route>
 
