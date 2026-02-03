@@ -3,7 +3,7 @@ import { Card, Input, Select, Button, Table, Badge } from '../../components/ui';
 import { salaryApi } from '../../api';
 import { Salary } from '../../types';
 import toast from 'react-hot-toast';
-import { Download, RefreshCw } from 'lucide-react';
+import { Printer, RefreshCw } from 'lucide-react';
 
 const statusOptions = [
   { value: '', label: 'All Status' },
@@ -82,6 +82,110 @@ export function SalaryReportPage() {
     toast.success('Report exported');
   };
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const tableRows = records
+      .map(
+        (r) => `
+      <tr>
+        <td>${r.employee_name || '-'}</td>
+        <td>${r.designation || '-'}</td>
+        <td>${r.rate_of_pay}</td>
+        <td>${r.month_days}</td>
+        <td>${r.overtime_hours}</td>
+        <td>${r.total_days_worked}</td>
+        <td>${r.amount}</td>
+        <td>${r.advance}</td>
+        <td>${r.net_amount}</td>
+        <td>${r.signature || '-'}</td>
+        <td>${r.status}</td>
+      </tr>
+    `
+      )
+      .join('');
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Salary Report</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            background: white;
+          }
+          h1 {
+            text-align: center;
+            margin-bottom: 20px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+          }
+          th {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+          }
+          td {
+            border: 1px solid #d1d5db;
+            padding: 8px;
+          }
+          tr:nth-child(even) {
+            background-color: #f9fafb;
+          }
+          @media print {
+            body {
+              margin: 0;
+            }
+            table {
+              page-break-inside: avoid;
+            }
+            tr {
+              page-break-inside: avoid;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Salary Report</h1>
+        <p>Month: ${month || 'All'} | Total Records: ${records.length}</p>
+        <p>Generated on: ${new Date().toLocaleString()}</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Designation</th>
+              <th>Rate of Pay</th>
+              <th>Month Days</th>
+              <th>Overtime (Hours)</th>
+              <th>Total Days of Work</th>
+              <th>Amount</th>
+              <th>Advance</th>
+              <th>Net Amount</th>
+              <th>Signature</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   const columns = [
     { key: 'employee_name', header: 'Name' },
     { key: 'designation', header: 'Designation' },
@@ -120,9 +224,9 @@ export function SalaryReportPage() {
           <p className="text-gray-600">Monthly salary report for employees</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="secondary" onClick={exportToCSV}>
-            <Download className="h-4 w-4 mr-2" />
-            Export CSV
+          <Button variant="secondary" onClick={handlePrint}>
+            <Printer className="h-4 w-4 mr-2" />
+            Print
           </Button>
           <Button onClick={fetchSalaries}>
             <RefreshCw className="h-4 w-4 mr-2" />

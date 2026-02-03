@@ -4,6 +4,7 @@ REM    Stop Attendance System
 REM    Closes all running servers
 REM ============================================================
 
+echo.
 echo Stopping Attendance System...
 echo.
 
@@ -23,6 +24,8 @@ REM Also kill any stray node processes running vite
 taskkill /f /im node.exe /fi "WINDOWTITLE eq Frontend*" 2>nul
 
 echo.
-echo Attendance System stopped.
+echo ============================================================
+echo    Attendance System stopped.
+echo ============================================================
 echo.
 pause

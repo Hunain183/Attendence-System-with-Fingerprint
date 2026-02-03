@@ -5,7 +5,7 @@ import {
   endOfMonth,
   eachDayOfInterval,
 } from 'date-fns';
-import { Download, Calendar, FileText } from 'lucide-react';
+import { Download, Calendar, FileText, Printer } from 'lucide-react';
 import {
   Button,
   Input,
@@ -173,6 +173,111 @@ export function ReportsPage() {
     toast.success('Report exported successfully');
   };
 
+  const handlePrint = () => {
+    const records = reportType === 'daily' ? dailyRecords : monthlyRecords;
+    
+    if (records.length === 0) {
+      toast.error('No data to print');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const tableRows = records
+      .map(
+        (r) => `
+      <tr>
+        <td>${format(new Date(r.attendance_date), 'MMM d, yyyy')}</td>
+        <td>${r.employee_no}</td>
+        <td>${r.employee_name}</td>
+        <td>${r.department || '-'}</td>
+        <td>${r.time_in ? r.time_in.slice(0, 5) : '-'}</td>
+        <td>${r.time_out ? r.time_out.slice(0, 5) : '-'}</td>
+        <td>${r.total_work_minutes ? `${Math.floor(r.total_work_minutes / 60)}h ${r.total_work_minutes % 60}m` : '-'}</td>
+        <td>${r.overtime ? `+${Math.floor(r.overtime_minutes / 60)}h ${r.overtime_minutes % 60}m` : '-'}</td>
+      </tr>
+    `
+      )
+      .join('');
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Attendance Report</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            background: white;
+          }
+          h1 {
+            text-align: center;
+            margin-bottom: 20px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+          }
+          th {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+          }
+          td {
+            border: 1px solid #d1d5db;
+            padding: 8px;
+          }
+          tr:nth-child(even) {
+            background-color: #f9fafb;
+          }
+          @media print {
+            body {
+              margin: 0;
+            }
+            table {
+              page-break-inside: avoid;
+            }
+            tr {
+              page-break-inside: avoid;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Attendance Report</h1>
+        <p>Report Type: ${reportType === 'daily' ? `Daily - ${selectedDate}` : `Monthly - ${selectedMonth}`}</p>
+        <p>Total Records: ${records.length}</p>
+        <p>Generated on: ${new Date().toLocaleString()}</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Employee No</th>
+              <th>Name</th>
+              <th>Department</th>\n              <th>Time In</th>
+              <th>Time Out</th>
+              <th>Total Hours</th>
+              <th>Overtime</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   const formatTime = (time: string | null) => {
     if (!time) return '-';
     return time.slice(0, 5);
@@ -232,11 +337,11 @@ export function ReportsPage() {
           </p>
         </div>
         <Button
-          icon={<Download className="h-4 w-4" />}
-          onClick={exportToCSV}
+          icon={<Printer className="h-4 w-4" />}
+          onClick={handlePrint}
           disabled={loading}
         >
-          Export CSV
+          Print
         </Button>
       </div>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
-import { Download, RefreshCw } from 'lucide-react';
+import { Printer, RefreshCw } from 'lucide-react';
 import { Button, Input, Select, Card, Table } from '../../components/ui';
 import { employeeApi } from '../../api';
 import { Employee, EmployeeFilters } from '../../types';
@@ -35,7 +35,7 @@ export function EmployeeReportPage() {
       if (filters.department) apiFilters.department = filters.department;
       if (filters.search) apiFilters.search = filters.search;
       
-      const data = await employeeApi.getAll(0, 1000, apiFilters);
+      const data = await employeeApi.getAll(0, 500, apiFilters);
       setEmployees(data.employees);
       setTotal(data.total);
     } catch (error) {
@@ -65,63 +65,122 @@ export function EmployeeReportPage() {
     return format(new Date(dateStr), 'MMM d, yyyy');
   };
 
-  const exportToCSV = () => {
-    if (employees.length === 0) {
-      toast.error('No data to export');
-      return;
-    }
+  const handlePrint = () => {
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
-    const headers = [
-      'Employee No',
-      'Name',
-      "Father's Name",
-      'Date of Birth',
-      'CNIC',
-      'Phone Number',
-      'Permanent Address',
-      'Current Address',
-      'Reference 1',
-      'Reference Address 1',
-      'Reference 2',
-      'Reference Address 2',
-      'Employment Type',
-      'Department',
-      'Designation',
-      'Date of Joining',
-      'Shift',
-    ];
+    // Generate HTML table with all data
+    const tableRows = employees
+      .map(
+        (e) => `
+      <tr>
+        <td>${e.employee_no}</td>
+        <td>${e.name}</td>
+        <td>${e.father_name || '-'}</td>
+        <td>${e.date_of_birth || '-'}</td>
+        <td>${e.cnic || '-'}</td>
+        <td>${e.phone_number || '-'}</td>
+        <td>${e.permanent_address || '-'}</td>
+        <td>${e.current_address || '-'}</td>
+        <td>${e.reference_1 || '-'}</td>
+        <td>${e.reference_address_1 || '-'}</td>
+        <td>${e.reference_2 || '-'}</td>
+        <td>${e.reference_address_2 || '-'}</td>
+        <td>${e.employment_type || '-'}</td>
+        <td>${e.department || '-'}</td>
+        <td>${e.designation || '-'}</td>
+        <td>${e.date_of_joining || '-'}</td>
+        <td>${e.shift || '-'}</td>
+      </tr>
+    `
+      )
+      .join('');
 
-    const rows = employees.map((e) => [
-      e.employee_no,
-      e.name,
-      e.father_name || '',
-      e.date_of_birth || '',
-      e.cnic || '',
-      e.phone_number || '',
-      e.permanent_address || '',
-      e.current_address || '',
-      e.reference_1 || '',
-      e.reference_address_1 || '',
-      e.reference_2 || '',
-      e.reference_address_2 || '',
-      e.employment_type || '',
-      e.department || '',
-      e.designation || '',
-      e.date_of_joining || '',
-      e.shift || '',
-    ]);
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Employee Report</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            background: white;
+          }
+          h1 {
+            text-align: center;
+            margin-bottom: 20px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+          }
+          th {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+          }
+          td {
+            border: 1px solid #d1d5db;
+            padding: 8px;
+          }
+          tr:nth-child(even) {
+            background-color: #f9fafb;
+          }
+          @media print {
+            body {
+              margin: 0;
+            }
+            table {
+              page-break-inside: avoid;
+            }
+            tr {
+              page-break-inside: avoid;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <h1>Employee Report</h1>
+        <p>Total Records: ${employees.length}</p>
+        <p>Generated on: ${new Date().toLocaleString()}</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Employee No</th>
+              <th>Name</th>
+              <th>Father's Name</th>
+              <th>Date of Birth</th>
+              <th>CNIC</th>
+              <th>Phone Number</th>
+              <th>Permanent Address</th>
+              <th>Current Address</th>
+              <th>Reference 1</th>
+              <th>Reference Address 1</th>
+              <th>Reference 2</th>
+              <th>Reference Address 2</th>
+              <th>Employment Type</th>
+              <th>Department</th>
+              <th>Designation</th>
+              <th>Date of Joining</th>
+              <th>Shift</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
 
-    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'employee-report.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-
-    toast.success('Report exported successfully');
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.print();
   };
 
   const columns = [
@@ -170,11 +229,11 @@ export function EmployeeReportPage() {
             Refresh
           </Button>
           <Button
-            icon={<Download className="h-4 w-4" />}
-            onClick={exportToCSV}
+            icon={<Printer className="h-4 w-4" />}
+            onClick={handlePrint}
             disabled={loading}
           >
-            Export CSV
+            Print
           </Button>
         </div>
       </div>

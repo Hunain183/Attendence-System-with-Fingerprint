@@ -89,7 +89,7 @@ def get_salaries(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
     db: Session = Depends(get_db),
-    _=Depends(get_current_admin)
+    _=Depends(require_roles({"primary_admin", "secondary_admin", "user"}))
 ):
     """
     Get all salary records with optional filters.
