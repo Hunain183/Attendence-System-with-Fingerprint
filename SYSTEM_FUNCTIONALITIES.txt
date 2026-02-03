@@ -47,26 +47,36 @@ PRIMARY ADMIN:
   - Full system access
   - Can manage all users
   - Can create/edit/delete secondary admins
-  - Can manage employees
+  - Can manage employees (create, edit, delete)
   - Can mark attendance manually
+  - Can update attendance records
+  - Can delete attendance records
   - Can generate all reports
   - Can manage salaries
   - Access to all features
 
 SECONDARY ADMIN:
   - Limited administrative access
-  - Can manage employees
+  - Can create new employees
+  - Can edit/update existing employees
+  - CANNOT delete employees (primary admin only)
   - Can view attendance records
+  - Can create manual attendance entries
+  - CANNOT update attendance records (primary admin only)
+  - CANNOT delete attendance records (primary admin only)
   - Can generate reports
   - Can manage salaries
   - Cannot manage other admin users
 
 USER:
-  - Read-only access
+  - Create and view access only
+  - Can create new employee records
+  - Can create manual attendance entries (time-in/time-out)
   - Can view dashboard
   - Can view attendance records
   - Can view reports
-  - Cannot modify data
+  - Can view salary records
+  - Cannot update or delete any records
 
 1.3 USER MANAGEMENT (Primary Admin Only)
 -----------------------------------------
@@ -163,10 +173,15 @@ SECTION 6: PREVIOUS EMPLOYMENT - NEW SECTION
   * Employment Type
 - Sort employees by any column
 - Pagination support
-- Edit employee details
-- Delete employees (with confirmation)
+- Edit employee details (primary and secondary admin)
+- Delete employees (primary admin only)
 - View complete employee profile
 - Export employee data
+
+PERMISSION NOTES:
+  - Primary Admin: Full access (create, edit, delete)
+  - Secondary Admin: Can create and edit, but CANNOT delete employees
+  - User: Can create and view, but CANNOT edit or delete
 
 2.4 EMPLOYEE FIELDS (Total: 30+ fields)
 ---------------------------------------
@@ -257,6 +272,13 @@ SECTION 6: PREVIOUS EMPLOYMENT - NEW SECTION
 - Attendance summary cards
 - Export to CSV/Excel
 - Print attendance sheet
+- Update attendance records (primary admin only)
+- Delete attendance records (primary admin only)
+
+PERMISSION NOTES:
+  - Primary Admin: Full access (view, update, delete)
+  - Secondary Admin: View only, CANNOT update or delete
+  - User: Read-only access
 
 3.5 OVERTIME MANAGEMENT
 -----------------------
@@ -480,6 +502,11 @@ Employee Details Report:
   * New employee without fingerprint
   * Fingerprint not recognized
 
+PERMISSION NOTES:
+  - Primary Admin: Can create, update, and delete manual entries
+  - Secondary Admin: Can create only, CANNOT update or delete
+  - User: Can create only (time-in/time-out), CANNOT update or delete
+
 7.2 MANUAL ENTRY FEATURES
 -------------------------
 - Employee selection dropdown
@@ -574,12 +601,26 @@ Real-time overview cards:
 
 9.2 SECONDARY ADMIN FEATURES
 ----------------------------
-- Employee Management (Full access)
-- Attendance Viewing (Read-only)
-- Manual Attendance Marking
-- Salary Management
-- Report Generation
-- Dashboard Access
+- Employee Management:
+  * Create new employees
+  * Edit existing employees
+  * CANNOT delete employees
+  * Enroll fingerprints
+- Attendance Management:
+  * View all attendance records
+  * Manual attendance entry (create new)
+  * CANNOT update attendance records
+  * CANNOT delete attendance records
+- Salary Management (Full access)
+- Report Generation (Full access)
+- Dashboard Access (Full access)
+
+RESTRICTIONS:
+  - Cannot manage other users
+  - Cannot delete employees
+    - Cannot update attendance records
+  - Cannot delete attendance records
+  - Cannot access system settings
 
 9.3 ADMIN NAVIGATION
 --------------------
@@ -639,6 +680,27 @@ Sidebar Menu:
 - Fine-grained permissions
 - Admin action logging
 - User activity tracking
+
+PERMISSION HIERARCHY:
+  PRIMARY ADMIN (Highest):
+    - All create, read, update, delete operations
+    - User management
+    - System settings
+    - Database management
+  
+  SECONDARY ADMIN (Limited):
+    - Create employees, attendance, salaries
+    - Read all records
+    - Update employees, attendance, salaries
+    - CANNOT delete employees
+    - CANNOT delete attendance
+    - CANNOT manage users
+  
+  USER (Create + View):
+    - Create new employee records
+    - Create manual attendance entries (time-in/time-out)
+    - View dashboard, reports, attendance, and salaries
+    - No update or delete permissions
 
 10.4 AUDIT TRAIL
 ----------------

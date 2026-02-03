@@ -193,12 +193,12 @@ async def update_employee(
 async def delete_employee(
     employee_id: int,
     db: Session = Depends(get_db),
-    admin: dict = Depends(get_current_admin)
+    admin: dict = Depends(require_roles({"primary_admin"}))
 ):
     """
     Delete an employee.
     
-    Requires admin authentication.
+    Requires primary admin authentication only.
     Also deletes associated attendance records (cascade).
     
     Args:

@@ -179,7 +179,7 @@ async def update_attendance(
     admin: dict = Depends(require_roles({"primary_admin"}))
 ):
     """
-    Update existing attendance record (Primary admin only).
+    Update an existing attendance record (Primary admin only).
     
     Args:
         attendance_id: ID of attendance record to update

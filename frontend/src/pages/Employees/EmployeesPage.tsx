@@ -35,6 +35,24 @@ export function EmployeesPage() {
   const [deleteEmployee, setDeleteEmployee] = useState<Employee | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Check user role
+  const getUserRole = () => {
+    const token = localStorage.getItem('token');
+    if (!token) return 'user';
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.role || 'user';
+    } catch {
+      return 'user';
+    }
+  };
+
+  const isPrimaryAdmin = () => getUserRole() === 'primary_admin';
+  const canEditEmployee = () => {
+    const role = getUserRole();
+    return role === 'primary_admin' || role === 'secondary_admin';
+  };
+
   const fetchEmployees = useCallback(async () => {
     try {
       setLoading(true);
@@ -132,40 +150,46 @@ export function EmployeesPage() {
       header: 'Actions',
       render: (item: Employee) => (
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEnrollFingerprint(item);
-            }}
-            title="Enroll Fingerprint"
-          >
-            <Fingerprint className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEditEmployee(item);
-            }}
-            title="Edit"
-          >
-            <Edit2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              setDeleteEmployee(item);
-            }}
-            title="Delete"
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {canEditEmployee() && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEnrollFingerprint(item);
+              }}
+              title="Enroll Fingerprint"
+            >
+              <Fingerprint className="h-4 w-4" />
+            </Button>
+          )}
+          {canEditEmployee() && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEditEmployee(item);
+              }}
+              title="Edit"
+            >
+              <Edit2 className="h-4 w-4" />
+            </Button>
+          )}
+          {isPrimaryAdmin() && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeleteEmployee(item);
+              }}
+              title="Delete"
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       ),
     },
