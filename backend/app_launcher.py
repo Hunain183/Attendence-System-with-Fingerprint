@@ -7,7 +7,7 @@ import sys
 import webbrowser
 import threading
 import time
-import traceback
+import logging
 
 # Add the backend directory to path
 if getattr(sys, 'frozen', False):
@@ -18,6 +18,17 @@ else:
 os.chdir(BASE_DIR)
 sys.path.insert(0, BASE_DIR)
 
+# Setup simple file logging for windowed mode
+log_file = os.path.join(BASE_DIR, 'attendance_system.log')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_file, mode='w'),
+    ]
+)
+logger = logging.getLogger(__name__)
+
 
 def open_browser():
     """Open browser after a short delay to let the server start."""
@@ -27,14 +38,12 @@ def open_browser():
 
 if __name__ == '__main__':
     try:
-        print('=' * 60)
-        print('  Attendance System - Starting...')
-        print('=' * 60)
-        print(f'  Working directory: {os.getcwd()}')
-        print('  Opening browser to http://localhost:8000')
-        print('  Press Ctrl+C to stop the server')
-        print('=' * 60)
-        print()
+        logger.info('=' * 60)
+        logger.info('Attendance System - Starting...')
+        logger.info('=' * 60)
+        logger.info(f'Working directory: {os.getcwd()}')
+        logger.info('Opening browser to http://localhost:8000')
+        logger.info('=' * 60)
 
         # Open browser in background
         threading.Thread(target=open_browser, daemon=True).start()
@@ -42,17 +51,21 @@ if __name__ == '__main__':
         # Import and run the FastAPI app
         import uvicorn
         from main import app
-        uvicorn.run(app, host='127.0.0.1', port=8000)
+        
+        # Configure uvicorn to work without console
+        config = uvicorn.Config(
+            app,
+            host='127.0.0.1',
+            port=8000,
+            log_config=None,  # Disable uvicorn's default logging
+            access_log=False  # Disable access logging
+        )
+        server = uvicorn.Server(config)
+        server.run()
         
     except Exception as e:
-        print()
-        print('=' * 60)
-        print('  ERROR: Application failed to start')
-        print('=' * 60)
-        print(str(e))
-        print()
-        traceback.print_exc()
-        print()
-        print('Press Enter to exit...')
-        input()
+        logger.error('Application failed to start')
+        logger.error(str(e))
+        logger.exception('Full traceback:')
+        # Don't call input() in windowed mode - just exit
         sys.exit(1)
