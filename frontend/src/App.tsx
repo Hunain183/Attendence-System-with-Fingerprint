@@ -13,6 +13,7 @@ import {
   ManualAttendancePage,
   SalaryFormPage,
   SalaryReportPage,
+  EmployeeReportPage,
 } from './pages';
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
           <Route path="/manual-attendance" element={<ManualAttendancePage />} />
           <Route path="/salary" element={<SalaryFormPage />} />
           <Route path="/salary-report" element={<SalaryReportPage />} />
+          <Route path="/employee-report" element={<EmployeeReportPage />} />
         </Route>
       </Route>
 

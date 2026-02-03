@@ -5,6 +5,7 @@ import {
   Users,
   ClipboardList,
   FileBarChart,
+  FileText,
   Menu,
   X,
   LogOut,
@@ -128,6 +129,21 @@ export function Layout() {
             >
               <FileBarChart className="h-5 w-5" />
               Salary Report
+            </NavLink>
+
+            {/* Employee Report link */}
+            <NavLink
+              to="/employee-report"
+              onClick={closeSidebar}
+              className={clsx(
+                'flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors mt-1',
+                location.pathname.startsWith('/employee-report')
+                  ? 'bg-primary-50 text-primary-700'
+                  : 'text-gray-600 hover:bg-gray-100'
+              )}
+            >
+              <FileText className="h-5 w-5" />
+              Employee Report
             </NavLink>
           </div>
           
