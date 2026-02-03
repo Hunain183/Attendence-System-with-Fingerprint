@@ -39,48 +39,6 @@ export function SalaryReportPage() {
     fetchSalaries();
   }, []);
 
-  const exportToCSV = () => {
-    if (records.length === 0) {
-      toast.error('No data to export');
-      return;
-    }
-
-    const headers = [
-      'Name',
-      'Designation',
-      'Rate of Pay',
-      'Month Days',
-      'Overtime (Hours)',
-      'Total Days of Work',
-      'Amount',
-      'Advance',
-      'Net Amount',
-      'Signature',
-    ];
-
-    const rows = records.map((r) => [
-      r.employee_name || '',
-      r.designation || '',
-      r.rate_of_pay,
-      r.month_days,
-      r.overtime_hours,
-      r.total_days_worked,
-      r.amount,
-      r.advance,
-      r.net_amount,
-      r.signature || '',
-    ]);
-
-    const csv = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `salary-report-${month || 'all'}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('Report exported');
-  };
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');

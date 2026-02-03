@@ -5,7 +5,7 @@ import {
   endOfMonth,
   eachDayOfInterval,
 } from 'date-fns';
-import { Download, Calendar, FileText, Printer } from 'lucide-react';
+import { Calendar, FileText, Printer } from 'lucide-react';
 import {
   Button,
   Input,
@@ -126,52 +126,6 @@ export function ReportsPage() {
     }
   }, [reportType, fetchDailyReport, fetchMonthlyReport]);
 
-  const exportToCSV = () => {
-    const records = reportType === 'daily' ? dailyRecords : monthlyRecords;
-
-    if (records.length === 0) {
-      toast.error('No data to export');
-      return;
-    }
-
-    const headers = [
-      'Date',
-      'Employee No',
-      'Name',
-      'Department',
-      'Time In',
-      'Time Out',
-      'Total Hours',
-      'Overtime',
-    ];
-
-    const rows = records.map((r) => [
-      r.attendance_date,
-      r.employee_no,
-      r.employee_name,
-      r.department || '',
-      r.time_in || '',
-      r.time_out || '',
-      r.total_work_minutes
-        ? `${Math.floor(r.total_work_minutes / 60)}h ${r.total_work_minutes % 60}m`
-        : '',
-      r.overtime ? `${r.overtime_minutes} mins` : 'No',
-    ]);
-
-    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `attendance-report-${reportType}-${
-      reportType === 'daily' ? selectedDate : selectedMonth
-    }.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-
-    toast.success('Report exported successfully');
-  };
 
   const handlePrint = () => {
     const records = reportType === 'daily' ? dailyRecords : monthlyRecords;

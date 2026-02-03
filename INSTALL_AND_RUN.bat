@@ -254,7 +254,7 @@ echo ============================================================
 echo    Application Started Successfully!
 echo ============================================================
 echo.
-echo    Opening browser to http://localhost:3000
+echo    Opening browser to http://localhost:3001
 echo.
 echo    Login with:
 echo      Username: admin
@@ -267,7 +267,7 @@ echo ============================================================
 echo.
 
 REM Open browser
-start "" "http://localhost:3000"
+start "" "http://localhost:3001"
 
 REM Clean up temp files
 if exist "%SCRIPT_DIR%temp\python-installer.exe" del "%SCRIPT_DIR%temp\python-installer.exe"

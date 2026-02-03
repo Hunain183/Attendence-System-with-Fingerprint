@@ -13,7 +13,7 @@ export interface Salary {
   net_amount: number;
   notes?: string;
   signature?: string;
-  status: string;
+  status: 'pending' | 'approved' | 'paid';
   created_at: string;
   updated_at: string;
   employee_name?: string;

@@ -26,7 +26,7 @@ REM Wait for backend
 timeout /t 5 /nobreak >nul
 
 REM Start frontend
-echo Starting Frontend Server on Port 3000...
+echo Starting Frontend Server (port will auto-increment if 3000 is in use)...
 cd "%SCRIPT_DIR%frontend"
 start "Frontend - Attendance System" cmd /k "npx vite --host"
 
@@ -38,7 +38,7 @@ echo ============================================================
 echo    Application Started!
 echo ============================================================
 echo.
-echo    Opening browser to http://localhost:3000
+echo    Opening browser to http://localhost:3001
 echo.
 echo    Login with:
 echo      Username: admin
@@ -48,7 +48,7 @@ echo ============================================================
 echo.
 
 REM Open browser
-start "" "http://localhost:3000"
+start "" "http://localhost:3001"
 
 echo Press any key to close this window...
 pause >nul
