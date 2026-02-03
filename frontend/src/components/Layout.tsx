@@ -5,7 +5,6 @@ import {
   Users,
   ClipboardList,
   FileBarChart,
-  FileText,
   Menu,
   X,
   LogOut,

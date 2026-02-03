@@ -106,7 +106,7 @@ async def get_employees_attendance_status(
 @router.post("/time-in", response_model=ManualAttendanceResponse)
 async def mark_employee_time_in(
     request: ManualAttendanceRequest,
-    payload: dict = Depends(require_roles({"user", "secondary_admin"})),
+    payload: dict = Depends(require_roles({"user", "secondary_admin", "primary_admin"})),
     db: Session = Depends(get_db),
 ):
     """Mark time in for an employee. Users and secondary admins only."""
@@ -171,7 +171,7 @@ async def mark_employee_time_in(
 @router.post("/time-out", response_model=ManualAttendanceResponse)
 async def mark_employee_time_out(
     request: ManualAttendanceRequest,
-    payload: dict = Depends(require_roles({"user", "secondary_admin"})),
+    payload: dict = Depends(require_roles({"user", "secondary_admin", "primary_admin"})),
     db: Session = Depends(get_db),
 ):
     """Mark time out for an employee. Users and secondary admins only."""

@@ -189,17 +189,17 @@ export function EmployeeModal({
 
       // Clean empty strings - only include non-empty values
       // For dates, convert to ISO format if present
-      const cleanData: Partial<EmployeeCreate> = {};
+      const cleanData: Record<string, any> = {};
       for (const [key, value] of Object.entries(formData)) {
         if (value !== '' && value !== null && value !== undefined) {
           if ((key === 'date_of_joining' || key === 'date_of_birth' || key === 'quit_date') && value) {
             // Convert date string to ISO datetime format
-            cleanData[key as keyof EmployeeCreate] = `${value}T00:00:00`;
+            cleanData[key] = `${value}T00:00:00`;
           } else if (key === 'monthly_salary' || key === 'rate_per_day') {
             // Convert to number
-            (cleanData as Record<string, any>)[key] = value ? parseInt(value as string) : undefined;
+            cleanData[key] = value ? parseInt(value as string) : undefined;
           } else {
-            (cleanData as Record<string, string>)[key] = value;
+            cleanData[key] = value;
           }
         }
       }
