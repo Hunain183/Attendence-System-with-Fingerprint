@@ -30,10 +30,12 @@ export function EmployeeReportPage() {
   const fetchEmployees = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await employeeApi.getAll(0, 1000, {
-        department: filters.department || undefined,
-        search: filters.search || undefined,
-      });
+      // Build filters object without undefined values
+      const apiFilters: EmployeeFilters = {};
+      if (filters.department) apiFilters.department = filters.department;
+      if (filters.search) apiFilters.search = filters.search;
+      
+      const data = await employeeApi.getAll(0, 1000, apiFilters);
       setEmployees(data.employees);
       setTotal(data.total);
     } catch (error) {
