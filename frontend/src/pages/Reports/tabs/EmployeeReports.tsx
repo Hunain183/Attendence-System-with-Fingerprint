@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { format } from 'date-fns';
 import { Printer, RefreshCw } from 'lucide-react';
 import { Button, Input, Select, Card, Table } from '../../../components/ui';
@@ -20,8 +20,11 @@ const departments = [
 
 export function EmployeeReports() {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [performaLoading, setPerformaLoading] = useState(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
   const [filters, setFilters] = useState<EmployeeFilters>({
     department: '',
     search: '',
@@ -50,6 +53,23 @@ export function EmployeeReports() {
     fetchEmployees();
   }, [fetchEmployees]);
 
+  const fetchEmployeeOptions = useCallback(async () => {
+    try {
+      setPerformaLoading(true);
+      const data = await employeeApi.getAll(0, 500);
+      setAllEmployees(data.employees);
+    } catch (error) {
+      toast.error('Failed to load employee list');
+      console.error(error);
+    } finally {
+      setPerformaLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchEmployeeOptions();
+  }, [fetchEmployeeOptions]);
+
   const handleFilterChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -63,6 +83,31 @@ export function EmployeeReports() {
   const formatDate = (dateStr?: string | null) => {
     if (!dateStr) return '-';
     return format(new Date(dateStr), 'MMM d, yyyy');
+  };
+
+  const formatCurrency = (value?: number | null) => {
+    if (value === null || value === undefined) return '-';
+    return value.toLocaleString('en-PK');
+  };
+
+  const selectedEmployee = useMemo(() => {
+    if (!selectedEmployeeId) return null;
+    return allEmployees.find((e) => e.id === Number(selectedEmployeeId)) || null;
+  }, [selectedEmployeeId, allEmployees]);
+
+  const printableValue = (value?: string | number | null) => {
+    if (value === null || value === undefined || value === '') return '________________';
+    return String(value);
+  };
+
+  const printableDate = (value?: string | null) => {
+    if (!value) return '________________';
+    return format(new Date(value), 'MMM d, yyyy');
+  };
+
+  const printableCurrency = (value?: number | null) => {
+    if (value === null || value === undefined) return '________________';
+    return formatCurrency(value);
   };
 
   const handlePrint = () => {
@@ -183,6 +228,163 @@ export function EmployeeReports() {
     printWindow.print();
   };
 
+  const handlePrintPerforma = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const e = selectedEmployee;
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Employee Performa</title>
+        <style>
+          body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 24px;
+            color: #111827;
+            background: #fff;
+          }
+          .page {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+          }
+          .header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            border-bottom: 2px solid #111827;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+          }
+          .title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+          }
+          .meta {
+            font-size: 12px;
+            color: #6b7280;
+          }
+          .section {
+            margin-top: 18px;
+          }
+          .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #111827;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+          }
+          .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 24px;
+          }
+          .field {
+            display: flex;
+            gap: 8px;
+            font-size: 13px;
+          }
+          .label {
+            min-width: 150px;
+            font-weight: 600;
+            color: #374151;
+          }
+          .value {
+            flex: 1;
+            border-bottom: 1px dotted #cbd5e1;
+            padding-bottom: 2px;
+          }
+          .full {
+            grid-column: 1 / -1;
+          }
+          @media print {
+            body { margin: 0; }
+            .page { border: none; border-radius: 0; padding: 12px; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="page">
+          <div class="header">
+            <div class="title">Employee Performa</div>
+            <div class="meta">Generated on: ${new Date().toLocaleString()}</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Personal Details</div>
+            <div class="grid">
+              <div class="field"><div class="label">Employee No</div><div class="value">${printableValue(e?.employee_no)}</div></div>
+              <div class="field"><div class="label">Name</div><div class="value">${printableValue(e?.name)}</div></div>
+              <div class="field"><div class="label">Father's Name</div><div class="value">${printableValue(e?.father_name)}</div></div>
+              <div class="field"><div class="label">Date of Birth</div><div class="value">${printableDate(e?.date_of_birth)}</div></div>
+              <div class="field"><div class="label">CNIC</div><div class="value">${printableValue(e?.cnic)}</div></div>
+              <div class="field"><div class="label">Phone Number</div><div class="value">${printableValue(e?.phone_number)}</div></div>
+              <div class="field full"><div class="label">Permanent Address</div><div class="value">${printableValue(e?.permanent_address)}</div></div>
+              <div class="field full"><div class="label">Current Address</div><div class="value">${printableValue(e?.current_address)}</div></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Employment Details</div>
+            <div class="grid">
+              <div class="field"><div class="label">Employment Type</div><div class="value">${printableValue(e?.employment_type)}</div></div>
+              <div class="field"><div class="label">Department</div><div class="value">${printableValue(e?.department)}</div></div>
+              <div class="field"><div class="label">Head of Department</div><div class="value">${printableValue(e?.hod)}</div></div>
+              <div class="field"><div class="label">Sub Department</div><div class="value">${printableValue(e?.sub_department)}</div></div>
+              <div class="field"><div class="label">Designation</div><div class="value">${printableValue(e?.designation)}</div></div>
+              <div class="field"><div class="label">Date of Joining</div><div class="value">${printableDate(e?.date_of_joining)}</div></div>
+              <div class="field"><div class="label">Shift</div><div class="value">${printableValue(e?.shift)}</div></div>
+              <div class="field"><div class="label">Rest Day</div><div class="value">${printableValue(e?.rest_day)}</div></div>
+              <div class="field"><div class="label">Quit Date</div><div class="value">${printableDate(e?.quit_date)}</div></div>
+              <div class="field full"><div class="label">Remarks</div><div class="value">${printableValue(e?.remarks)}</div></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Salary Details</div>
+            <div class="grid">
+              <div class="field"><div class="label">Monthly Salary (PKR)</div><div class="value">${printableCurrency(e?.monthly_salary)}</div></div>
+              <div class="field"><div class="label">Rate Per Day (PKR)</div><div class="value">${printableCurrency(e?.rate_per_day)}</div></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">References</div>
+            <div class="grid">
+              <div class="field"><div class="label">Reference 1</div><div class="value">${printableValue(e?.reference_1)}</div></div>
+              <div class="field"><div class="label">Reference Address 1</div><div class="value">${printableValue(e?.reference_address_1)}</div></div>
+              <div class="field"><div class="label">Reference 2</div><div class="value">${printableValue(e?.reference_2)}</div></div>
+              <div class="field"><div class="label">Reference Address 2</div><div class="value">${printableValue(e?.reference_address_2)}</div></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Previous Employment</div>
+            <div class="grid">
+              <div class="field"><div class="label">Previous Employer</div><div class="value">${printableValue(e?.previous_employer)}</div></div>
+              <div class="field"><div class="label">Address</div><div class="value">${printableValue(e?.previous_employer_address)}</div></div>
+              <div class="field"><div class="label">Designation</div><div class="value">${printableValue(e?.previous_designation)}</div></div>
+              <div class="field"><div class="label">Period of Service</div><div class="value">${printableValue(e?.previous_period_of_service)}</div></div>
+            </div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
   const columns = [
     { key: 'employee_no', header: 'Employee No' },
     { key: 'name', header: 'Name' },
@@ -254,6 +456,78 @@ export function EmployeeReports() {
             onChange={handleFilterChange}
             placeholder="Name or employee no"
           />
+        </div>
+      </Card>
+
+      <Card className="fade-in">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Employee Performa
+            </h3>
+            <p className="text-sm text-gray-500">
+              Print a single employee profile or a blank template
+            </p>
+          </div>
+          <Button
+            icon={<Printer className="h-4 w-4" />}
+            onClick={handlePrintPerforma}
+            disabled={performaLoading}
+          >
+            Print Performa
+          </Button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Select
+            label="Select Employee"
+            value={selectedEmployeeId}
+            onChange={(e) => setSelectedEmployeeId(e.target.value)}
+            options={[
+              { value: '', label: 'Empty (Blank)' },
+              ...allEmployees.map((e) => ({
+                value: String(e.id),
+                label: `${e.employee_no} - ${e.name}`,
+              })),
+            ]}
+          />
+          <Input
+            label="Generated On"
+            value={new Date().toLocaleDateString()}
+            disabled
+          />
+        </div>
+
+        <div className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <div className="text-xs uppercase tracking-wider text-gray-500 font-semibold">
+            Preview
+          </div>
+          <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Employee No</span>
+              <span className="font-medium text-gray-900">
+                {selectedEmployee?.employee_no || '________'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Name</span>
+              <span className="font-medium text-gray-900">
+                {selectedEmployee?.name || '________'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Department</span>
+              <span className="font-medium text-gray-900">
+                {selectedEmployee?.department || '________'}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Designation</span>
+              <span className="font-medium text-gray-900">
+                {selectedEmployee?.designation || '________'}
+              </span>
+            </div>
+          </div>
         </div>
       </Card>
 
