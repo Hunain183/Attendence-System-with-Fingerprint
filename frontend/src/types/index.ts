@@ -21,6 +21,9 @@ export interface Employee {
   remarks: string | null;
   monthly_salary: number | null;
   rate_per_day: number | null;
+  increment: number | null;
+  date_of_increment: string | null;
+  total_salary: number | null;
   reference_1: string | null;
   reference_2: string | null;
   reference_address_1: string | null;
@@ -55,6 +58,9 @@ export interface EmployeeCreate {
   remarks?: string;
   monthly_salary?: number;
   rate_per_day?: number;
+  increment?: number;
+  date_of_increment?: string;
+  total_salary?: number;
   reference_1?: string;
   reference_2?: string;
   reference_address_1?: string;

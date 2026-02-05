@@ -233,6 +233,12 @@ export function EmployeeReports() {
     if (!printWindow) return;
 
     const e = selectedEmployee;
+    const computedTotalSalary = e
+      ? e.total_salary ??
+        (e.monthly_salary == null && e.increment == null
+          ? null
+          : (e.monthly_salary || 0) + (e.increment || 0))
+      : null;
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -305,6 +311,36 @@ export function EmployeeReports() {
           .full {
             grid-column: 1 / -1;
           }
+          .signatures {
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+          }
+          .sig-row {
+            display: flex;
+            gap: 24px;
+            align-items: flex-end;
+          }
+          .sig-right {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+          }
+          .sig-block {
+            min-width: 160px;
+            text-align: center;
+            font-size: 12px;
+          }
+          .sig-line {
+            letter-spacing: 1px;
+          }
+          .sig-label {
+            margin-top: 6px;
+            color: #374151;
+            font-weight: 600;
+          }
           @media print {
             body { margin: 0; }
             .page { border: none; border-radius: 0; padding: 12px; }
@@ -322,11 +358,11 @@ export function EmployeeReports() {
             <div class="section-title">Personal Details</div>
             <div class="grid">
               <div class="field"><div class="label">Employee No</div><div class="value">${printableValue(e?.employee_no)}</div></div>
+              <div class="field"><div class="label">CNIC</div><div class="value">${printableValue(e?.cnic)}</div></div>
               <div class="field"><div class="label">Name</div><div class="value">${printableValue(e?.name)}</div></div>
               <div class="field"><div class="label">Father's Name</div><div class="value">${printableValue(e?.father_name)}</div></div>
-              <div class="field"><div class="label">Date of Birth</div><div class="value">${printableDate(e?.date_of_birth)}</div></div>
-              <div class="field"><div class="label">CNIC</div><div class="value">${printableValue(e?.cnic)}</div></div>
               <div class="field"><div class="label">Phone Number</div><div class="value">${printableValue(e?.phone_number)}</div></div>
+              <div class="field"><div class="label">Date of Birth</div><div class="value">${printableDate(e?.date_of_birth)}</div></div>
               <div class="field full"><div class="label">Permanent Address</div><div class="value">${printableValue(e?.permanent_address)}</div></div>
               <div class="field full"><div class="label">Current Address</div><div class="value">${printableValue(e?.current_address)}</div></div>
             </div>
@@ -336,13 +372,12 @@ export function EmployeeReports() {
             <div class="section-title">Employment Details</div>
             <div class="grid">
               <div class="field"><div class="label">Employment Type</div><div class="value">${printableValue(e?.employment_type)}</div></div>
-              <div class="field"><div class="label">Department</div><div class="value">${printableValue(e?.department)}</div></div>
               <div class="field"><div class="label">Head of Department</div><div class="value">${printableValue(e?.hod)}</div></div>
+              <div class="field"><div class="label">Department</div><div class="value">${printableValue(e?.department)}</div></div>
               <div class="field"><div class="label">Sub Department</div><div class="value">${printableValue(e?.sub_department)}</div></div>
               <div class="field"><div class="label">Designation</div><div class="value">${printableValue(e?.designation)}</div></div>
-              <div class="field"><div class="label">Date of Joining</div><div class="value">${printableDate(e?.date_of_joining)}</div></div>
               <div class="field"><div class="label">Shift</div><div class="value">${printableValue(e?.shift)}</div></div>
-              <div class="field"><div class="label">Rest Day</div><div class="value">${printableValue(e?.rest_day)}</div></div>
+              <div class="field"><div class="label">Date of Joining</div><div class="value">${printableDate(e?.date_of_joining)}</div></div>
               <div class="field"><div class="label">Quit Date</div><div class="value">${printableDate(e?.quit_date)}</div></div>
               <div class="field full"><div class="label">Remarks</div><div class="value">${printableValue(e?.remarks)}</div></div>
             </div>
@@ -353,6 +388,9 @@ export function EmployeeReports() {
             <div class="grid">
               <div class="field"><div class="label">Monthly Salary (PKR)</div><div class="value">${printableCurrency(e?.monthly_salary)}</div></div>
               <div class="field"><div class="label">Rate Per Day (PKR)</div><div class="value">${printableCurrency(e?.rate_per_day)}</div></div>
+              <div class="field"><div class="label">Increment (PKR)</div><div class="value">${printableCurrency(e?.increment)}</div></div>
+              <div class="field"><div class="label">Date of Increment</div><div class="value">${printableDate(e?.date_of_increment)}</div></div>
+              <div class="field"><div class="label">Total Salary</div><div class="value">${printableCurrency(computedTotalSalary)}</div></div>
             </div>
           </div>
 
@@ -373,6 +411,32 @@ export function EmployeeReports() {
               <div class="field"><div class="label">Address</div><div class="value">${printableValue(e?.previous_employer_address)}</div></div>
               <div class="field"><div class="label">Designation</div><div class="value">${printableValue(e?.previous_designation)}</div></div>
               <div class="field"><div class="label">Period of Service</div><div class="value">${printableValue(e?.previous_period_of_service)}</div></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Signatures</div>
+            <div class="signatures">
+              <div class="sig-row">
+                <div class="sig-block">
+                  <div class="sig-line">________________</div>
+                  <div class="sig-label">HR-Admin Dept</div>
+                </div>
+                <div class="sig-block">
+                  <div class="sig-line">______________</div>
+                  <div class="sig-label">Head of Dept</div>
+                </div>
+              </div>
+              <div class="sig-right">
+                <div class="sig-block">
+                  <div class="sig-line">______________</div>
+                  <div class="sig-label">C.E.O / Director</div>
+                </div>
+                <div class="sig-block">
+                  <div class="sig-line">_______________</div>
+                  <div class="sig-label">Head of Audit</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

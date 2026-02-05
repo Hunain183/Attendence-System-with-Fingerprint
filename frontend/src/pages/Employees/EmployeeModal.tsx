@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Modal, Button, Input, Select } from '../../components/ui';
 import { employeeApi } from '../../api';
 import { Employee, EmployeeCreate, EmployeeUpdate } from '../../types';
@@ -73,6 +73,9 @@ export function EmployeeModal({
     remarks: '',
     monthly_salary: '',
     rate_per_day: '',
+    increment: '',
+    date_of_increment: '',
+    total_salary: '',
     reference_1: '',
     reference_2: '',
     reference_address_1: '',
@@ -111,6 +114,11 @@ export function EmployeeModal({
         remarks: employee.remarks || '',
         monthly_salary: employee.monthly_salary?.toString() || '',
         rate_per_day: employee.rate_per_day?.toString() || '',
+        increment: employee.increment?.toString() || '',
+        date_of_increment: employee.date_of_increment
+          ? employee.date_of_increment.split('T')[0]
+          : '',
+        total_salary: employee.total_salary?.toString() || '',
         reference_1: employee.reference_1 || '',
         reference_2: employee.reference_2 || '',
         reference_address_1: employee.reference_address_1 || '',
@@ -142,6 +150,9 @@ export function EmployeeModal({
         remarks: '',
         monthly_salary: '',
         rate_per_day: '',
+        increment: '',
+        date_of_increment: '',
+        total_salary: '',
         reference_1: '',
         reference_2: '',
         reference_address_1: '',
@@ -179,6 +190,15 @@ export function EmployeeModal({
     return Object.keys(newErrors).length === 0;
   };
 
+  const totalSalaryValue = useMemo(() => {
+    const monthly = parseInt(String(formData.monthly_salary ?? ''), 10);
+    const increment = parseInt(String(formData.increment ?? ''), 10);
+    if (Number.isNaN(monthly) && Number.isNaN(increment)) return '';
+    const monthlyValue = Number.isNaN(monthly) ? 0 : monthly;
+    const incrementValue = Number.isNaN(increment) ? 0 : increment;
+    return String(monthlyValue + incrementValue);
+  }, [formData.monthly_salary, formData.increment]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -192,16 +212,31 @@ export function EmployeeModal({
       const cleanData: Record<string, any> = {};
       for (const [key, value] of Object.entries(formData)) {
         if (value !== '' && value !== null && value !== undefined) {
-          if ((key === 'date_of_joining' || key === 'date_of_birth' || key === 'quit_date') && value) {
+          if (
+            (key === 'date_of_joining' ||
+              key === 'date_of_birth' ||
+              key === 'quit_date' ||
+              key === 'date_of_increment') &&
+            value
+          ) {
             // Convert date string to ISO datetime format
             cleanData[key] = `${value}T00:00:00`;
-          } else if (key === 'monthly_salary' || key === 'rate_per_day') {
+          } else if (
+            key === 'monthly_salary' ||
+            key === 'rate_per_day' ||
+            key === 'increment' ||
+            key === 'total_salary'
+          ) {
             // Convert to number
             cleanData[key] = value ? parseInt(value as string) : undefined;
           } else {
             cleanData[key] = value;
           }
         }
+      }
+
+      if (totalSalaryValue !== '') {
+        cleanData.total_salary = parseInt(totalSalaryValue, 10);
       }
       
       console.log('Submitting employee data:', JSON.stringify(cleanData, null, 2));
@@ -408,6 +443,28 @@ export function EmployeeModal({
               value={formData.rate_per_day}
               onChange={handleChange}
               placeholder="Auto-calculated"
+              readOnly
+            />
+            <Input
+              label="Increment (PKR)"
+              name="increment"
+              type="number"
+              value={formData.increment}
+              onChange={handleChange}
+              placeholder="e.g., 5000"
+            />
+            <Input
+              label="Date of Increment"
+              name="date_of_increment"
+              type="date"
+              value={formData.date_of_increment}
+              onChange={handleChange}
+            />
+            <Input
+              label="Total Salary"
+              name="total_salary"
+              type="number"
+              value={totalSalaryValue}
               readOnly
             />
           </div>

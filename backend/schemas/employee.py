@@ -31,6 +31,9 @@ class EmployeeCreate(BaseModel):
     remarks: Optional[str] = None
     monthly_salary: Optional[int] = Field(None, description="Monthly salary in rupees")
     rate_per_day: Optional[int] = Field(None, description="Rate per day (auto-calculated)")
+    increment: Optional[int] = Field(None, description="Increment amount in rupees")
+    date_of_increment: Optional[datetime] = None
+    total_salary: Optional[int] = Field(None, description="Monthly salary + increment")
     reference_1: Optional[str] = Field(None, max_length=200)
     reference_2: Optional[str] = Field(None, max_length=200)
     reference_address_1: Optional[str] = None
@@ -63,6 +66,9 @@ class EmployeeUpdate(BaseModel):
     remarks: Optional[str] = None
     monthly_salary: Optional[int] = None
     rate_per_day: Optional[int] = None
+    increment: Optional[int] = None
+    date_of_increment: Optional[datetime] = None
+    total_salary: Optional[int] = None
     reference_1: Optional[str] = Field(None, max_length=200)
     reference_2: Optional[str] = Field(None, max_length=200)
     reference_address_1: Optional[str] = None
@@ -104,6 +110,9 @@ class EmployeeResponse(BaseModel):
     remarks: Optional[str] = None
     monthly_salary: Optional[int] = None
     rate_per_day: Optional[int] = None
+    increment: Optional[int] = None
+    date_of_increment: Optional[datetime] = None
+    total_salary: Optional[int] = None
     reference_1: Optional[str] = None
     reference_2: Optional[str] = None
     reference_address_1: Optional[str] = None

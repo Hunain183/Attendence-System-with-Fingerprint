@@ -51,6 +51,9 @@ class Employee(Base):
     # Salary details
     monthly_salary = Column(Integer, nullable=True)  # in rupees
     rate_per_day = Column(Integer, nullable=True)  # calculated: monthly_salary / days_in_month
+    increment = Column(Integer, nullable=True)  # salary increment in rupees
+    date_of_increment = Column(DateTime, nullable=True)
+    total_salary = Column(Integer, nullable=True)  # monthly_salary + increment
     
     # Previous employment
     previous_employer = Column(String(200), nullable=True)

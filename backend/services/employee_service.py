@@ -12,6 +12,28 @@ from utils.encryption import encryption_service
 
 class EmployeeService:
     """Service class for employee CRUD operations."""
+
+    @staticmethod
+    def _apply_total_salary(
+        data: dict,
+        employee: Optional[Employee] = None,
+    ) -> None:
+        monthly_salary = data.get("monthly_salary")
+        increment = data.get("increment")
+
+        if employee is not None:
+            if "monthly_salary" not in data:
+                monthly_salary = employee.monthly_salary
+            if "increment" not in data:
+                increment = employee.increment
+
+        if monthly_salary is None and increment is None:
+            data["total_salary"] = None
+            return
+
+        monthly_salary = monthly_salary or 0
+        increment = increment or 0
+        data["total_salary"] = monthly_salary + increment
     
     @staticmethod
     def create_employee(db: Session, employee_data: EmployeeCreate) -> Employee:
@@ -36,8 +58,11 @@ class EmployeeService:
         if existing:
             raise ValueError(f"Employee with employee_no '{employee_data.employee_no}' already exists")
         
+        employee_dict = employee_data.model_dump()
+        EmployeeService._apply_total_salary(employee_dict)
+
         # Create employee instance
-        employee = Employee(**employee_data.model_dump())
+        employee = Employee(**employee_dict)
         
         try:
             db.add(employee)
@@ -137,6 +162,8 @@ class EmployeeService:
             if existing:
                 raise ValueError(f"Employee with employee_no '{update_dict['employee_no']}' already exists")
         
+        EmployeeService._apply_total_salary(update_dict, employee)
+
         # Update fields
         for field, value in update_dict.items():
             setattr(employee, field, value)
