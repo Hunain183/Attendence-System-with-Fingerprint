@@ -423,23 +423,23 @@ export function EmployeeReports() {
             <div class="signatures">
               <div class="sig-left">
                 <div class="sig-block">
-                  <div class="sig-line">________________</div>
-                  <div class="sig-label">HR-Admin Dept</div>
+                  <div class="sig-line">____________________</div>
+                  <div class="sig-label">HR-Admin Department</div>
                 </div>
               </div>
               <div class="sig-center">
                 <div class="sig-block">
-                  <div class="sig-line">______________</div>
-                  <div class="sig-label">Head of Dept</div>
+                  <div class="sig-line">____________________</div>
+                  <div class="sig-label">Head of Department</div>
                 </div>
               </div>
               <div class="sig-right">
                 <div class="sig-block">
-                  <div class="sig-line">______________</div>
+                  <div class="sig-line">____________________</div>
                   <div class="sig-label">C.E.O / Director</div>
                 </div>
                 <div class="sig-block">
-                  <div class="sig-line">_______________</div>
+                  <div class="sig-line">____________________</div>
                   <div class="sig-label">Head of Audit</div>
                 </div>
               </div>
