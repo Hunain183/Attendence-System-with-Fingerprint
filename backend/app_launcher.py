@@ -8,6 +8,7 @@ import webbrowser
 import threading
 import time
 import logging
+import socket
 
 # Add the backend directory to path
 if getattr(sys, 'frozen', False):
@@ -30,6 +31,27 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def is_port_in_use(port):
+    """Check if a port is already in use."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.settimeout(1)
+            s.connect(('127.0.0.1', port))
+            return True
+        except (socket.timeout, ConnectionRefusedError, OSError):
+            return False
+
+
+def check_backend_health():
+    """Check if the backend is responding on port 8000."""
+    try:
+        import urllib.request
+        with urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2) as response:
+            return response.status == 200
+    except:
+        return False
+
+
 def open_browser():
     """Open browser after a short delay to let the server start."""
     time.sleep(3)
@@ -42,6 +64,21 @@ if __name__ == '__main__':
         logger.info('Attendance System - Starting...')
         logger.info('=' * 60)
         logger.info(f'Working directory: {os.getcwd()}')
+        
+        # Check if backend is already running
+        if is_port_in_use(8000):
+            logger.info('Backend is already running on port 8000')
+            if check_backend_health():
+                logger.info('Backend health check passed - opening browser')
+                webbrowser.open('http://localhost:8000')
+                logger.info('Browser opened. Exiting launcher.')
+                sys.exit(0)
+            else:
+                logger.warning('Port 8000 is in use but backend not responding')
+                logger.warning('Please close the existing process and try again')
+                sys.exit(1)
+        
+        logger.info('Starting backend server on port 8000...')
         logger.info('Opening browser to http://localhost:8000')
         logger.info('=' * 60)
 
