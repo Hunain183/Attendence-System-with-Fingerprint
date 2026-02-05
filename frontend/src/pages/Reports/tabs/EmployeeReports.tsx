@@ -317,16 +317,20 @@ export function EmployeeReports() {
             justify-content: space-between;
             align-items: flex-start;
           }
-          .sig-row {
+          .sig-left {
+            flex: 1;
+          }
+          .sig-center {
+            flex: 1;
             display: flex;
-            gap: 24px;
-            align-items: flex-end;
+            justify-content: center;
           }
           .sig-right {
+            flex: 1;
             display: flex;
             flex-direction: column;
             gap: 16px;
-            align-items: center;
+            align-items: flex-end;
           }
           .sig-block {
             min-width: 160px;
@@ -417,11 +421,13 @@ export function EmployeeReports() {
           <div class="section">
             <div class="section-title">Signatures</div>
             <div class="signatures">
-              <div class="sig-row">
+              <div class="sig-left">
                 <div class="sig-block">
                   <div class="sig-line">________________</div>
                   <div class="sig-label">HR-Admin Dept</div>
                 </div>
+              </div>
+              <div class="sig-center">
                 <div class="sig-block">
                   <div class="sig-line">______________</div>
                   <div class="sig-label">Head of Dept</div>
