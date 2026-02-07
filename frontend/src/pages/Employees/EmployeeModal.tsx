@@ -46,12 +46,37 @@ const restDays = [
   { value: 'Saturday', label: 'Saturday' },
 ];
 
+const genders = [
+  { value: 'Male', label: 'Male' },
+  { value: 'Female', label: 'Female' },
+  { value: 'Other', label: 'Other' },
+];
+
+const bloodGroups = [
+  { value: 'A+', label: 'A+' },
+  { value: 'A-', label: 'A-' },
+  { value: 'B+', label: 'B+' },
+  { value: 'B-', label: 'B-' },
+  { value: 'AB+', label: 'AB+' },
+  { value: 'AB-', label: 'AB-' },
+  { value: 'O+', label: 'O+' },
+  { value: 'O-', label: 'O-' },
+];
+
+const maritalStatuses = [
+  { value: 'Single', label: 'Single' },
+  { value: 'Married', label: 'Married' },
+  { value: 'Divorced', label: 'Divorced' },
+  { value: 'Widowed', label: 'Widowed' },
+];
+
 export function EmployeeModal({
   isOpen,
   onClose,
   employee,
 }: EmployeeModalProps) {
   const [loading, setLoading] = useState(false);
+  const [picturePreview, setPicturePreview] = useState<string>('');
   const [formData, setFormData] = useState<EmployeeCreate>({
     employee_no: '',
     name: '',
@@ -59,6 +84,11 @@ export function EmployeeModal({
     date_of_birth: '',
     cnic: '',
     phone_number: '',
+    picture: '',
+    gender: '',
+    blood_group: '',
+    marital_status: '',
+    emergency_contact_no: '',
     permanent_address: '',
     current_address: '',
     employment_type: '',
@@ -98,6 +128,11 @@ export function EmployeeModal({
         date_of_birth: employee.date_of_birth ? employee.date_of_birth.split('T')[0] : '',
         cnic: employee.cnic || '',
         phone_number: employee.phone_number || '',
+        picture: employee.picture || '',
+        gender: employee.gender || '',
+        blood_group: employee.blood_group || '',
+        marital_status: employee.marital_status || '',
+        emergency_contact_no: employee.emergency_contact_no || '',
         permanent_address: employee.permanent_address || '',
         current_address: employee.current_address || '',
         employment_type: employee.employment_type || '',
@@ -128,6 +163,7 @@ export function EmployeeModal({
         previous_designation: employee.previous_designation || '',
         previous_period_of_service: employee.previous_period_of_service || '',
       } as any);
+      setPicturePreview(employee.picture || '');
     } else {
       setFormData({
         employee_no: '',
@@ -136,6 +172,11 @@ export function EmployeeModal({
         date_of_birth: '',
         cnic: '',
         phone_number: '',
+        picture: '',
+        gender: '',
+        blood_group: '',
+        marital_status: '',
+        emergency_contact_no: '',
         permanent_address: '',
         current_address: '',
         employment_type: '',
@@ -162,6 +203,7 @@ export function EmployeeModal({
         previous_designation: '',
         previous_period_of_service: '',
       } as any);
+      setPicturePreview('');
     }
     setErrors({});
   }, [employee, isOpen]);
@@ -174,6 +216,18 @@ export function EmployeeModal({
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handlePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const result = typeof reader.result === 'string' ? reader.result : '';
+      setFormData((prev) => ({ ...prev, picture: result }));
+      setPicturePreview(result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const validate = (): boolean => {
@@ -323,6 +377,57 @@ export function EmployeeModal({
             value={formData.phone_number}
             onChange={handleChange}
             placeholder="+92 300 1234567"
+          />
+          <div className="w-full">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Picture (Passport size)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePictureChange}
+              className="w-full px-3 py-2 border rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 border-gray-300"
+            />
+            {picturePreview && (
+              <div className="mt-2">
+                <img
+                  src={picturePreview}
+                  alt="Employee"
+                  className="h-16 w-16 rounded object-cover border border-gray-200"
+                />
+              </div>
+            )}
+          </div>
+          <Select
+            label="Gender"
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            options={genders}
+            placeholder="Select gender"
+          />
+          <Select
+            label="Blood Group"
+            name="blood_group"
+            value={formData.blood_group}
+            onChange={handleChange}
+            options={bloodGroups}
+            placeholder="Select blood group"
+          />
+          <Select
+            label="Marital Status"
+            name="marital_status"
+            value={formData.marital_status}
+            onChange={handleChange}
+            options={maritalStatuses}
+            placeholder="Select marital status"
+          />
+          <Input
+            label="Emergency Contact No"
+            name="emergency_contact_no"
+            value={formData.emergency_contact_no}
+            onChange={handleChange}
+            placeholder="Emergency contact"
           />
         </div>
 

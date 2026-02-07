@@ -27,6 +27,11 @@ class Employee(Base):
     date_of_birth = Column(DateTime, nullable=True)
     cnic = Column(String(15), nullable=True)  # Format: 12345-1234567-1
     phone_number = Column(String(20), nullable=True)
+    picture = Column(Text, nullable=True)
+    gender = Column(String(20), nullable=True)
+    blood_group = Column(String(10), nullable=True)
+    marital_status = Column(String(20), nullable=True)
+    emergency_contact_no = Column(String(20), nullable=True)
     permanent_address = Column(Text, nullable=True)
     current_address = Column(Text, nullable=True)
     

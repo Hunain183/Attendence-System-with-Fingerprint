@@ -105,6 +105,17 @@ export function EmployeeReports() {
     return format(new Date(value), 'MMM d, yyyy');
   };
 
+  const printablePicture = (value?: string | null) => {
+    if (!value) return 'PICTURE';
+    const trimmed = value.trim();
+    const isDataUrl = trimmed.startsWith('data:image/');
+    const isHttpUrl = /^https?:\/\//.test(trimmed);
+    if (isDataUrl || isHttpUrl) {
+      return `<img src="${trimmed}" alt="Employee" style="width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid #d1d5db;" />`;
+    }
+    return trimmed.length > 60 ? 'Provided' : trimmed;
+  };
+
   const printableCurrency = (value?: number | null) => {
     if (value === null || value === undefined) return '________________';
     return formatCurrency(value);
@@ -225,7 +236,30 @@ export function EmployeeReports() {
 
     printWindow.document.write(htmlContent);
     printWindow.document.close();
-    printWindow.print();
+    const waitForImages = () => {
+      const images = Array.from(printWindow.document.images || []);
+      if (images.length === 0) {
+        printWindow.print();
+        return;
+      }
+      let loaded = 0;
+      const done = () => {
+        loaded += 1;
+        if (loaded === images.length) {
+          printWindow.print();
+        }
+      };
+      images.forEach((img) => {
+        if (img.complete) {
+          done();
+        } else {
+          img.onload = done;
+          img.onerror = done;
+        }
+      });
+    };
+
+    setTimeout(waitForImages, 0);
   };
 
   const handlePrintPerforma = () => {
@@ -264,6 +298,39 @@ export function EmployeeReports() {
             border-bottom: 2px solid #111827;
             padding-bottom: 12px;
             margin-bottom: 18px;
+          }
+          .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+          }
+          .picture-box {
+            width: 96px;
+            height: 96px;
+            border: 1px solid #9ca3af;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            overflow: hidden;
+          }
+          .picture-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+          .personal-section {
+            position: relative;
+            padding-right: 120px;
+          }
+          .picture-float {
+            position: absolute;
+            top: 34px;
+            right: 0;
           }
           .title {
             font-size: 22px;
@@ -312,7 +379,7 @@ export function EmployeeReports() {
             grid-column: 1 / -1;
           }
           .signatures {
-            margin-top: 8px;
+            margin-top: 6px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
@@ -329,7 +396,7 @@ export function EmployeeReports() {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 10px;
             align-items: flex-end;
           }
           .sig-block {
@@ -354,12 +421,17 @@ export function EmployeeReports() {
       <body>
         <div class="page">
           <div class="header">
-            <div class="title">Employee Performa</div>
-            <div class="meta">Generated on: ${new Date().toLocaleString()}</div>
+            <div class="header-left">
+              <div class="title">Employee Performa</div>
+              <div class="meta">Generated on: ${new Date().toLocaleString()}</div>
+            </div>
           </div>
 
-          <div class="section">
+          <div class="section personal-section">
             <div class="section-title">Personal Details</div>
+            <div class="picture-float">
+              <div class="picture-box">${printablePicture(e?.picture)}</div>
+            </div>
             <div class="grid">
               <div class="field"><div class="label">Employee No</div><div class="value">${printableValue(e?.employee_no)}</div></div>
               <div class="field"><div class="label">CNIC</div><div class="value">${printableValue(e?.cnic)}</div></div>
@@ -367,6 +439,10 @@ export function EmployeeReports() {
               <div class="field"><div class="label">Father's Name</div><div class="value">${printableValue(e?.father_name)}</div></div>
               <div class="field"><div class="label">Phone Number</div><div class="value">${printableValue(e?.phone_number)}</div></div>
               <div class="field"><div class="label">Date of Birth</div><div class="value">${printableDate(e?.date_of_birth)}</div></div>
+              <div class="field"><div class="label">Gender</div><div class="value">${printableValue(e?.gender)}</div></div>
+              <div class="field"><div class="label">Blood Group</div><div class="value">${printableValue(e?.blood_group)}</div></div>
+              <div class="field"><div class="label">Marital Status</div><div class="value">${printableValue(e?.marital_status)}</div></div>
+              <div class="field"><div class="label">Emergency Contact No</div><div class="value">${printableValue(e?.emergency_contact_no)}</div></div>
               <div class="field full"><div class="label">Permanent Address</div><div class="value">${printableValue(e?.permanent_address)}</div></div>
               <div class="field full"><div class="label">Current Address</div><div class="value">${printableValue(e?.current_address)}</div></div>
             </div>
@@ -419,7 +495,6 @@ export function EmployeeReports() {
           </div>
 
           <div class="section">
-            <div class="section-title">Signatures</div>
             <div class="signatures">
               <div class="sig-left">
                 <div class="sig-block">
@@ -445,6 +520,7 @@ export function EmployeeReports() {
               </div>
             </div>
           </div>
+
         </div>
       </body>
       </html>
@@ -452,7 +528,18 @@ export function EmployeeReports() {
 
     printWindow.document.write(htmlContent);
     printWindow.document.close();
-    printWindow.print();
+
+    // Wait for images to load before printing
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+
+    // Fallback: if onload doesn't fire within 500ms, print anyway
+    setTimeout(() => {
+      if (printWindow && !printWindow.closed) {
+        printWindow.print();
+      }
+    }, 500);
   };
 
   const columns = [

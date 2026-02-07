@@ -65,6 +65,28 @@ export function EmployeeReportPage() {
     return format(new Date(dateStr), 'MMM d, yyyy');
   };
 
+  const getPictureDisplay = (value?: string | null) => {
+    if (!value) return { type: 'text' as const, value: '-' };
+    const trimmed = value.trim();
+    const isDataUrl = trimmed.startsWith('data:image/');
+    const isHttpUrl = /^https?:\/\//.test(trimmed);
+    if (isDataUrl || isHttpUrl) {
+      return { type: 'img' as const, value: trimmed };
+    }
+    if (trimmed.length > 80) {
+      return { type: 'text' as const, value: 'Provided' };
+    }
+    return { type: 'text' as const, value: trimmed };
+  };
+
+  const formatPictureForPrint = (value?: string | null) => {
+    const display = getPictureDisplay(value);
+    if (display.type === 'img') {
+      return `<img src="${display.value}" alt="Employee" style="width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #d1d5db;" />`;
+    }
+    return display.value;
+  };
+
   const handlePrint = () => {
     // Create a new window for printing
     const printWindow = window.open('', '_blank');
@@ -81,6 +103,11 @@ export function EmployeeReportPage() {
         <td>${e.date_of_birth || '-'}</td>
         <td>${e.cnic || '-'}</td>
         <td>${e.phone_number || '-'}</td>
+        <td>${formatPictureForPrint(e.picture)}</td>
+        <td>${e.gender || '-'}</td>
+        <td>${e.blood_group || '-'}</td>
+        <td>${e.marital_status || '-'}</td>
+        <td>${e.emergency_contact_no || '-'}</td>
         <td>${e.permanent_address || '-'}</td>
         <td>${e.current_address || '-'}</td>
         <td>${e.reference_1 || '-'}</td>
@@ -157,6 +184,11 @@ export function EmployeeReportPage() {
               <th>Date of Birth</th>
               <th>CNIC</th>
               <th>Phone Number</th>
+              <th>Picture</th>
+              <th>Gender</th>
+              <th>Blood Group</th>
+              <th>Marital Status</th>
+              <th>Emergency Contact No</th>
               <th>Permanent Address</th>
               <th>Current Address</th>
               <th>Reference 1</th>
@@ -194,6 +226,27 @@ export function EmployeeReportPage() {
     },
     { key: 'cnic', header: 'CNIC' },
     { key: 'phone_number', header: 'Phone Number' },
+    {
+      key: 'picture',
+      header: 'Picture',
+      render: (item: Employee) => {
+        const display = getPictureDisplay(item.picture);
+        if (display.type === 'img') {
+          return (
+            <img
+              src={display.value}
+              alt="Employee"
+              className="h-8 w-8 rounded object-cover border border-gray-200"
+            />
+          );
+        }
+        return display.value;
+      },
+    },
+    { key: 'gender', header: 'Gender' },
+    { key: 'blood_group', header: 'Blood Group' },
+    { key: 'marital_status', header: 'Marital Status' },
+    { key: 'emergency_contact_no', header: 'Emergency Contact No' },
     { key: 'permanent_address', header: 'Permanent Address' },
     { key: 'current_address', header: 'Current Address' },
     { key: 'reference_1', header: 'Reference 1' },

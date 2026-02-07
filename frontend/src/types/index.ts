@@ -7,6 +7,11 @@ export interface Employee {
   date_of_birth: string | null;
   cnic: string | null;
   phone_number: string | null;
+  picture: string | null;
+  gender: string | null;
+  blood_group: string | null;
+  marital_status: string | null;
+  emergency_contact_no: string | null;
   permanent_address: string | null;
   current_address: string | null;
   employment_type: string | null;
@@ -44,6 +49,11 @@ export interface EmployeeCreate {
   date_of_birth?: string;
   cnic?: string;
   phone_number?: string;
+  picture?: string;
+  gender?: string;
+  blood_group?: string;
+  marital_status?: string;
+  emergency_contact_no?: string;
   permanent_address?: string;
   current_address?: string;
   employment_type?: string;

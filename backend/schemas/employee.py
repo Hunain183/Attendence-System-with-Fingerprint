@@ -17,6 +17,11 @@ class EmployeeCreate(BaseModel):
     date_of_birth: Optional[datetime] = None
     cnic: Optional[str] = Field(None, max_length=15, description="CNIC format: 12345-1234567-1")
     phone_number: Optional[str] = Field(None, max_length=20)
+    picture: Optional[str] = None
+    gender: Optional[str] = Field(None, max_length=20)
+    blood_group: Optional[str] = Field(None, max_length=10)
+    marital_status: Optional[str] = Field(None, max_length=20)
+    emergency_contact_no: Optional[str] = Field(None, max_length=20)
     permanent_address: Optional[str] = None
     current_address: Optional[str] = None
     employment_type: Optional[str] = Field(None, max_length=50, description="e.g., Full-time, Part-time, Contract")
@@ -52,6 +57,11 @@ class EmployeeUpdate(BaseModel):
     date_of_birth: Optional[datetime] = None
     cnic: Optional[str] = Field(None, max_length=15)
     phone_number: Optional[str] = Field(None, max_length=20)
+    picture: Optional[str] = None
+    gender: Optional[str] = Field(None, max_length=20)
+    blood_group: Optional[str] = Field(None, max_length=10)
+    marital_status: Optional[str] = Field(None, max_length=20)
+    emergency_contact_no: Optional[str] = Field(None, max_length=20)
     permanent_address: Optional[str] = None
     current_address: Optional[str] = None
     employment_type: Optional[str] = Field(None, max_length=50)
@@ -96,6 +106,11 @@ class EmployeeResponse(BaseModel):
     date_of_birth: Optional[datetime] = None
     cnic: Optional[str] = None
     phone_number: Optional[str] = None
+    picture: Optional[str] = None
+    gender: Optional[str] = None
+    blood_group: Optional[str] = None
+    marital_status: Optional[str] = None
+    emergency_contact_no: Optional[str] = None
     permanent_address: Optional[str] = None
     current_address: Optional[str] = None
     employment_type: Optional[str] = None
