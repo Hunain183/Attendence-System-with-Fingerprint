@@ -5,7 +5,7 @@ Only primary admin can update attendance records.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timedelta
 from typing import Optional, List
 from pydantic import BaseModel, Field
 
@@ -13,6 +13,7 @@ from auth.dependencies import require_roles
 from database import get_db
 from models.attendance import Attendance
 from models.employee import Employee
+from utils.shifts import get_shift_hours
 
 router = APIRouter(prefix="/manual-attendance", tags=["Manual Attendance"])
 
@@ -52,7 +53,15 @@ class EmployeeAttendanceStatus(BaseModel):
     attendance_id: Optional[int] = None
     time_in: Optional[time] = None
     time_out: Optional[time] = None
-    status: str  # "not_marked", "time_in_only", "complete"
+    leave_type: Optional[str] = None  # 'half_leave' or 'full_leave'
+    status: str  # "not_marked", "time_in_only", "complete", "half_leave", "full_leave"
+
+
+class LeaveMarkRequest(BaseModel):
+    """Request to mark leave for an employee."""
+    employee_no: str = Field(..., description="Employee number")
+    leave_type: str = Field(..., description="Leave type: 'half_leave' or 'full_leave'")
+    time_in: Optional[str] = Field(None, description="Time in (HH:MM) for half leave")
 
 
 @router.get("/employees-status", response_model=List[EmployeeAttendanceStatus])
@@ -79,16 +88,25 @@ async def get_employees_attendance_status(
             att_id = None
             time_in = None
             time_out = None
+            leave_type = None
+        elif attendance.leave_type:
+            status = attendance.leave_type  # 'half_leave' or 'full_leave'
+            att_id = attendance.id
+            time_in = attendance.time_in
+            time_out = attendance.time_out
+            leave_type = attendance.leave_type
         elif attendance.time_out is None:
             status = "time_in_only"
             att_id = attendance.id
             time_in = attendance.time_in
             time_out = None
+            leave_type = None
         else:
             status = "complete"
             att_id = attendance.id
             time_in = attendance.time_in
             time_out = attendance.time_out
+            leave_type = None
         
         result.append(EmployeeAttendanceStatus(
             employee_no=emp.employee_no,
@@ -97,6 +115,7 @@ async def get_employees_attendance_status(
             attendance_id=att_id,
             time_in=time_in,
             time_out=time_out,
+            leave_type=leave_type,
             status=status
         ))
     
@@ -302,3 +321,152 @@ async def update_attendance(
         action="updated",
         message="Attendance updated successfully"
     )
+
+
+# Leave marking endpoint - primary and secondary admin only
+@router.post("/mark-leave", response_model=ManualAttendanceResponse)
+async def mark_employee_leave(
+    request: LeaveMarkRequest,
+    payload: dict = Depends(require_roles({"primary_admin", "secondary_admin"})),
+    db: Session = Depends(get_db),
+):
+    """Mark half or full leave for an employee. Primary and secondary admins only."""
+    today = date.today()
+    
+    # Validate leave type
+    if request.leave_type not in ["half_leave", "full_leave"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid leave type. Use 'half_leave' or 'full_leave'"
+        )
+    
+    # Find employee
+    employee = db.query(Employee).filter(Employee.employee_no == request.employee_no).first()
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Employee with number '{request.employee_no}' not found"
+        )
+    
+    # Check if attendance already exists today
+    attendance = db.query(Attendance).filter(
+        Attendance.employee_no == request.employee_no,
+        Attendance.attendance_date == today
+    ).first()
+    
+    if request.leave_type == "half_leave":
+        parsed_time_in: Optional[time] = None
+        if request.time_in:
+            try:
+                parsed_time_in = datetime.strptime(request.time_in, "%H:%M").time()
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid time_in format. Use HH:MM"
+                )
+
+        if attendance and attendance.time_out:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Time out already recorded for {employee.name}"
+            )
+
+        if not attendance:
+            if not parsed_time_in:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Please enter time in first for {employee.name}"
+                )
+            attendance = Attendance(
+                employee_no=request.employee_no,
+                attendance_date=today,
+                time_in=parsed_time_in,
+                leave_type=request.leave_type,
+                device_id="MANUAL_LEAVE"
+            )
+            db.add(attendance)
+        else:
+            if parsed_time_in:
+                attendance.time_in = parsed_time_in
+            if not attendance.time_in:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Please enter time in first for {employee.name}"
+                )
+            attendance.leave_type = request.leave_type
+            attendance.device_id = "MANUAL_LEAVE"
+
+        half_minutes = int(get_shift_hours(employee.shift) * 60 / 2)
+        time_in_dt = datetime.combine(today, attendance.time_in)
+        time_out_dt = time_in_dt + timedelta(minutes=half_minutes)
+        attendance.time_out = time_out_dt.time()
+        attendance.total_work_minutes = half_minutes
+        attendance.update_overtime()
+    elif attendance:
+        # Update existing record with leave type
+        attendance.leave_type = request.leave_type
+        attendance.time_in = None
+        attendance.time_out = None
+        attendance.total_work_minutes = 0
+        attendance.overtime = False
+        attendance.overtime_minutes = 0
+        attendance.device_id = "MANUAL_LEAVE"
+    else:
+        # Create new attendance record with leave
+        attendance = Attendance(
+            employee_no=request.employee_no,
+            attendance_date=today,
+            leave_type=request.leave_type,
+            device_id="MANUAL_LEAVE"
+        )
+        db.add(attendance)
+    
+    db.commit()
+    db.refresh(attendance)
+    
+    leave_label = "Half Leave" if request.leave_type == "half_leave" else "Full Leave"
+    
+    return ManualAttendanceResponse(
+        id=attendance.id,
+        employee_no=employee.employee_no,
+        employee_name=employee.name,
+        attendance_date=today,
+        time_in=attendance.time_in,
+        time_out=attendance.time_out,
+        total_work_minutes=attendance.total_work_minutes or 0,
+        action="leave_marked",
+        message=f"{leave_label} marked for {employee.name}"
+    )
+
+
+# Cancel leave endpoint - primary admin only
+@router.delete("/cancel-leave/{attendance_id}")
+async def cancel_employee_leave(
+    attendance_id: int,
+    payload: dict = Depends(require_roles({"primary_admin"})),
+    db: Session = Depends(get_db),
+):
+    """Cancel leave for an employee. Primary admin only."""
+    attendance = db.query(Attendance).filter(Attendance.id == attendance_id).first()
+    
+    if not attendance:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Attendance record not found"
+        )
+    
+    if not attendance.leave_type:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This attendance record does not have leave marked"
+        )
+    
+    # Get employee name
+    employee = db.query(Employee).filter(Employee.employee_no == attendance.employee_no).first()
+    employee_name = employee.name if employee else attendance.employee_no
+    
+    # Remove leave - delete the record entirely
+    db.delete(attendance)
+    db.commit()
+    
+    return {"message": f"Leave cancelled for {employee_name}", "success": True}

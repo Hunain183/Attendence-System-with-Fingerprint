@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LogIn, LogOut, CheckCircle, Search, RefreshCw, Edit } from 'lucide-react';
+import { LogIn, LogOut, CheckCircle, Search, RefreshCw, Edit, Calendar, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Card, Button, Badge, Input, Modal } from '../../components/ui';
 import { manualAttendanceApi, EmployeeAttendanceStatus } from '../../api/manualAttendance';
@@ -15,14 +15,21 @@ export function ManualAttendancePage() {
   const [editTimeOut, setEditTimeOut] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeAttendanceStatus | null>(null);
+  const [halfLeaveTimeIn, setHalfLeaveTimeIn] = useState('');
 
   // Get user role from token
   let isPrimaryAdmin = false;
+  let isSecondaryAdmin = false;
+  let canMarkLeave = false;
   const authToken = localStorage.getItem('token');
   if (authToken) {
     try {
       const payload = JSON.parse(atob(authToken.split('.')[1]));
       isPrimaryAdmin = payload.role === 'primary_admin';
+      isSecondaryAdmin = payload.role === 'secondary_admin';
+      canMarkLeave = isPrimaryAdmin || isSecondaryAdmin;
     } catch (e) {}
   }
 
@@ -103,6 +110,57 @@ export function ManualAttendancePage() {
     }
   };
 
+  const handleLeaveClick = (emp: EmployeeAttendanceStatus) => {
+    setSelectedEmployee(emp);
+    setHalfLeaveTimeIn(emp.time_in ? emp.time_in.slice(0, 5) : '');
+    setShowLeaveModal(true);
+  };
+
+  const handleMarkLeave = async (leaveType: 'half_leave' | 'full_leave') => {
+    if (!selectedEmployee) return;
+    if (leaveType === 'half_leave' && !halfLeaveTimeIn) {
+      toast.error('Time in is required for half leave');
+      return;
+    }
+
+    try {
+      setMarking(selectedEmployee.employee_no);
+      const response = await manualAttendanceApi.markLeave(
+        selectedEmployee.employee_no,
+        leaveType,
+        leaveType === 'half_leave' ? halfLeaveTimeIn : undefined
+      );
+      toast.success(response.message);
+      setShowLeaveModal(false);
+      setSelectedEmployee(null);
+      setHalfLeaveTimeIn('');
+      loadEmployees();
+    } catch (error) {
+      const errorMsg = (error as any)?.response?.data?.detail || 'Failed to mark leave';
+      toast.error(errorMsg);
+    } finally {
+      setMarking(null);
+    }
+  };
+
+  const handleCancelLeave = async (emp: EmployeeAttendanceStatus) => {
+    if (!emp.attendance_id) return;
+
+    if (!confirm(`Cancel leave for ${emp.name}?`)) return;
+
+    try {
+      setMarking(emp.employee_no);
+      const response = await manualAttendanceApi.cancelLeave(emp.attendance_id);
+      toast.success(response.message);
+      loadEmployees();
+    } catch (error) {
+      const errorMsg = (error as any)?.response?.data?.detail || 'Failed to cancel leave';
+      toast.error(errorMsg);
+    } finally {
+      setMarking(null);
+    }
+  };
+
   const formatTime = (time: string | null) => {
     if (!time) return '--:--';
     return time.slice(0, 5);
@@ -118,6 +176,7 @@ export function ManualAttendancePage() {
     total: employees.length,
     notMarked: employees.filter(e => e.status === 'not_marked').length,
     inProgress: employees.filter(e => e.status === 'time_in_only').length,
+    leave: employees.filter(e => e.status === 'half_leave' || e.status === 'full_leave').length,
     complete: employees.filter(e => e.status === 'complete').length,
   };
 
@@ -146,7 +205,7 @@ export function ManualAttendancePage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card className="text-center p-4">
           <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
           <p className="text-sm text-gray-500">Total Employees</p>
@@ -158,6 +217,10 @@ export function ManualAttendancePage() {
         <Card className="text-center p-4 bg-yellow-50">
           <p className="text-2xl font-bold text-yellow-600">{stats.inProgress}</p>
           <p className="text-sm text-gray-500">In Progress</p>
+        </Card>
+        <Card className="text-center p-4 bg-blue-50">
+          <p className="text-2xl font-bold text-blue-600">{stats.leave}</p>
+          <p className="text-sm text-gray-500">On Leave</p>
         </Card>
         <Card className="text-center p-4 bg-green-50">
           <p className="text-2xl font-bold text-green-600">{stats.complete}</p>
@@ -221,6 +284,10 @@ export function ManualAttendancePage() {
                         <Badge variant="success">Complete</Badge>
                       ) : emp.status === 'time_in_only' ? (
                         <Badge variant="warning">In Progress</Badge>
+                      ) : emp.status === 'half_leave' ? (
+                        <Badge variant="info">Half Leave</Badge>
+                      ) : emp.status === 'full_leave' ? (
+                        <Badge variant="danger">Full Leave</Badge>
                       ) : (
                         <Badge variant="default">Not Marked</Badge>
                       )}
@@ -228,14 +295,26 @@ export function ManualAttendancePage() {
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
                         {emp.status === 'not_marked' && (
-                          <Button
-                            onClick={() => handleTimeIn(emp.employee_no)}
-                            loading={marking === emp.employee_no}
-                            className="flex items-center gap-1 text-sm"
-                          >
-                            <LogIn className="w-4 h-4" />
-                            Time In
-                          </Button>
+                          <>
+                            <Button
+                              onClick={() => handleTimeIn(emp.employee_no)}
+                              loading={marking === emp.employee_no}
+                              className="flex items-center gap-1 text-sm"
+                            >
+                              <LogIn className="w-4 h-4" />
+                              Time In
+                            </Button>
+                            {canMarkLeave && (
+                              <Button
+                                onClick={() => handleLeaveClick(emp)}
+                                variant="secondary"
+                                className="flex items-center gap-1 text-sm"
+                              >
+                                <Calendar className="w-4 h-4" />
+                                Leave
+                              </Button>
+                            )}
+                          </>
                         )}
                         {emp.status === 'time_in_only' && (
                           <Button
@@ -246,6 +325,25 @@ export function ManualAttendancePage() {
                             <LogOut className="w-4 h-4" />
                             Time Out
                           </Button>
+                        )}
+                        {(emp.status === 'half_leave' || emp.status === 'full_leave') && (
+                          <>
+                            <span className="flex items-center gap-1 text-blue-600 text-sm">
+                              <Calendar className="w-4 h-4" />
+                              {emp.status === 'half_leave' ? 'Half Leave' : 'Full Leave'}
+                            </span>
+                            {isPrimaryAdmin && emp.attendance_id && (
+                              <Button
+                                onClick={() => handleCancelLeave(emp)}
+                                variant="danger"
+                                loading={marking === emp.employee_no}
+                                className="flex items-center gap-1 text-sm"
+                              >
+                                <XCircle className="w-4 h-4" />
+                                Cancel
+                              </Button>
+                            )}
+                          </>
                         )}
                         {emp.status === 'complete' && (
                           <>
@@ -326,6 +424,66 @@ export function ManualAttendancePage() {
               className="bg-blue-600 hover:bg-blue-700"
             >
               Update
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Leave Modal */}
+      <Modal
+        isOpen={showLeaveModal}
+        onClose={() => setShowLeaveModal(false)}
+        title="Mark Leave"
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Mark leave for {selectedEmployee?.name} ({selectedEmployee?.employee_no})
+          </p>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Time In (HH:MM)
+              </label>
+              <input
+                type="time"
+                value={halfLeaveTimeIn}
+                onChange={(e) => setHalfLeaveTimeIn(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Required for half leave. Time out will be auto-calculated.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <Button
+              onClick={() => handleMarkLeave('half_leave')}
+              loading={marking === selectedEmployee?.employee_no}
+              className="flex items-center gap-1"
+            >
+              <Calendar className="w-4 h-4" />
+              Half Leave
+            </Button>
+            <Button
+              onClick={() => handleMarkLeave('full_leave')}
+              loading={marking === selectedEmployee?.employee_no}
+              variant="danger"
+              className="flex items-center gap-1"
+            >
+              <Calendar className="w-4 h-4" />
+              Full Leave
+            </Button>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              variant="secondary"
+              onClick={() => setShowLeaveModal(false)}
+              disabled={marking === selectedEmployee?.employee_no}
+            >
+              Cancel
             </Button>
           </div>
         </div>

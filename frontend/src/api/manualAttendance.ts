@@ -7,7 +7,8 @@ export interface EmployeeAttendanceStatus {
   attendance_id: number | null;
   time_in: string | null;
   time_out: string | null;
-  status: 'not_marked' | 'time_in_only' | 'complete';
+  leave_type: string | null;
+  status: 'not_marked' | 'time_in_only' | 'complete' | 'half_leave' | 'full_leave';
 }
 
 export interface ManualAttendanceResponse {
@@ -25,6 +26,12 @@ export interface ManualAttendanceResponse {
 export interface AttendanceUpdateRequest {
   time_in?: string;
   time_out?: string;
+}
+
+export interface LeaveMarkRequest {
+  employee_no: string;
+  leave_type: 'half_leave' | 'full_leave';
+  time_in?: string;
 }
 
 export const manualAttendanceApi = {
@@ -61,6 +68,30 @@ export const manualAttendanceApi = {
    */
   update: async (attendanceId: number, data: AttendanceUpdateRequest): Promise<ManualAttendanceResponse> => {
     const response = await api.put<ManualAttendanceResponse>(`/manual-attendance/${attendanceId}`, data);
+    return response.data;
+  },
+
+  /**
+   * Mark leave for an employee (primary and secondary admin only)
+   */
+  markLeave: async (
+    employeeNo: string,
+    leaveType: 'half_leave' | 'full_leave',
+    timeIn?: string
+  ): Promise<ManualAttendanceResponse> => {
+    const response = await api.post<ManualAttendanceResponse>('/manual-attendance/mark-leave', {
+      employee_no: employeeNo,
+      leave_type: leaveType,
+      time_in: timeIn,
+    });
+    return response.data;
+  },
+
+  /**
+   * Cancel leave for an employee (primary admin only)
+   */
+  cancelLeave: async (attendanceId: number): Promise<{ message: string; success: boolean }> => {
+    const response = await api.delete<{ message: string; success: boolean }>(`/manual-attendance/cancel-leave/${attendanceId}`);
     return response.data;
   },
 };

@@ -40,6 +40,9 @@ class Attendance(Base):
     overtime = Column(Boolean, nullable=False, default=False)
     overtime_minutes = Column(Integer, nullable=True, default=0)
     
+    # Leave tracking (half_leave, full_leave, or null for normal attendance)
+    leave_type = Column(String(20), nullable=True)  # 'half_leave' or 'full_leave'
+    
     # Device that recorded attendance
     device_id = Column(String(100), nullable=True)
     

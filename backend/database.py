@@ -153,6 +153,7 @@ def _expected_schema() -> dict[str, dict[str, str]]:
             "total_work_minutes": "INTEGER DEFAULT 0",
             "overtime": "BOOLEAN DEFAULT 0",
             "overtime_minutes": "INTEGER DEFAULT 0",
+            "leave_type": "VARCHAR(20)",
             "device_id": "VARCHAR(100)",
             "created_at": "DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL",
         },
