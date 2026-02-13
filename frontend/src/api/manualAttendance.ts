@@ -32,23 +32,28 @@ export interface LeaveMarkRequest {
   employee_no: string;
   leave_type: 'half_leave' | 'full_leave';
   time_in?: string;
+  leave_date?: string;
 }
 
 export const manualAttendanceApi = {
   /**
    * Get all employees with their attendance status for today
    */
-  getEmployeesStatus: async (): Promise<EmployeeAttendanceStatus[]> => {
-    const response = await api.get<EmployeeAttendanceStatus[]>('/manual-attendance/employees-status');
+  getEmployeesStatus: async (attendanceDate?: string): Promise<EmployeeAttendanceStatus[]> => {
+    const response = await api.get<EmployeeAttendanceStatus[]>('/manual-attendance/employees-status', {
+      params: attendanceDate ? { attendance_date: attendanceDate } : undefined,
+    });
     return response.data;
   },
 
   /**
    * Mark time in for an employee
    */
-  markTimeIn: async (employeeNo: string): Promise<ManualAttendanceResponse> => {
+  markTimeIn: async (employeeNo: string, timeIn?: string, attendanceDate?: string): Promise<ManualAttendanceResponse> => {
     const response = await api.post<ManualAttendanceResponse>('/manual-attendance/time-in', {
       employee_no: employeeNo,
+      time_in: timeIn,
+      attendance_date: attendanceDate,
     });
     return response.data;
   },
@@ -56,9 +61,11 @@ export const manualAttendanceApi = {
   /**
    * Mark time out for an employee
    */
-  markTimeOut: async (employeeNo: string): Promise<ManualAttendanceResponse> => {
+  markTimeOut: async (employeeNo: string, timeOut?: string, attendanceDate?: string): Promise<ManualAttendanceResponse> => {
     const response = await api.post<ManualAttendanceResponse>('/manual-attendance/time-out', {
       employee_no: employeeNo,
+      time_out: timeOut,
+      attendance_date: attendanceDate,
     });
     return response.data;
   },
@@ -77,12 +84,14 @@ export const manualAttendanceApi = {
   markLeave: async (
     employeeNo: string,
     leaveType: 'half_leave' | 'full_leave',
-    timeIn?: string
+    timeIn?: string,
+    leaveDate?: string
   ): Promise<ManualAttendanceResponse> => {
     const response = await api.post<ManualAttendanceResponse>('/manual-attendance/mark-leave', {
       employee_no: employeeNo,
       leave_type: leaveType,
       time_in: timeIn,
+      leave_date: leaveDate,
     });
     return response.data;
   },

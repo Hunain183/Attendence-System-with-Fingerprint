@@ -3,7 +3,7 @@ Manual attendance routes.
 Allows users and secondary admins to mark attendance for employees.
 Only primary admin can update attendance records.
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from datetime import date, time, datetime, timedelta
 from typing import Optional, List
@@ -21,6 +21,9 @@ router = APIRouter(prefix="/manual-attendance", tags=["Manual Attendance"])
 class ManualAttendanceRequest(BaseModel):
     """Request to mark attendance manually."""
     employee_no: str = Field(..., description="Employee number")
+    time_in: Optional[str] = Field(None, description="Time in (HH:MM)")
+    time_out: Optional[str] = Field(None, description="Time out (HH:MM)")
+    attendance_date: Optional[str] = Field(None, description="Attendance date (YYYY-MM-DD)")
 
 
 class ManualAttendanceResponse(BaseModel):
@@ -62,15 +65,17 @@ class LeaveMarkRequest(BaseModel):
     employee_no: str = Field(..., description="Employee number")
     leave_type: str = Field(..., description="Leave type: 'half_leave' or 'full_leave'")
     time_in: Optional[str] = Field(None, description="Time in (HH:MM) for half leave")
+    leave_date: Optional[str] = Field(None, description="Leave date (YYYY-MM-DD) for full leave")
 
 
 @router.get("/employees-status", response_model=List[EmployeeAttendanceStatus])
 async def get_employees_attendance_status(
     payload: dict = Depends(require_roles({"user", "secondary_admin", "primary_admin"})),
     db: Session = Depends(get_db),
+    attendance_date: Optional[date] = Query(None, description="Attendance date (YYYY-MM-DD)"),
 ):
     """Get all employees with their attendance status for today."""
-    today = date.today()
+    target_date = attendance_date or date.today()
     
     # Get all employees
     employees = db.query(Employee).all()
@@ -80,7 +85,7 @@ async def get_employees_attendance_status(
         # Get today's attendance for this employee
         attendance = db.query(Attendance).filter(
             Attendance.employee_no == emp.employee_no,
-            Attendance.attendance_date == today
+            Attendance.attendance_date == target_date
         ).first()
         
         if attendance is None:
@@ -130,7 +135,24 @@ async def mark_employee_time_in(
 ):
     """Mark time in for an employee. Users and secondary admins only."""
     today = date.today()
-    now = datetime.now().time()
+    if request.attendance_date:
+        try:
+            today = datetime.strptime(request.attendance_date, "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid attendance_date format. Use YYYY-MM-DD"
+            )
+    if request.time_in:
+        try:
+            now = datetime.strptime(request.time_in, "%H:%M").time()
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid time_in format. Use HH:MM"
+            )
+    else:
+        now = datetime.now().time()
     
     # Find employee
     employee = db.query(Employee).filter(Employee.employee_no == request.employee_no).first()
@@ -195,7 +217,24 @@ async def mark_employee_time_out(
 ):
     """Mark time out for an employee. Users and secondary admins only."""
     today = date.today()
-    now = datetime.now().time()
+    if request.attendance_date:
+        try:
+            today = datetime.strptime(request.attendance_date, "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid attendance_date format. Use YYYY-MM-DD"
+            )
+    if request.time_out:
+        try:
+            now = datetime.strptime(request.time_out, "%H:%M").time()
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid time_out format. Use HH:MM"
+            )
+    else:
+        now = datetime.now().time()
     
     # Find employee
     employee = db.query(Employee).filter(Employee.employee_no == request.employee_no).first()
@@ -332,6 +371,7 @@ async def mark_employee_leave(
 ):
     """Mark half or full leave for an employee. Primary and secondary admins only."""
     today = date.today()
+    target_date = today
     
     # Validate leave type
     if request.leave_type not in ["half_leave", "full_leave"]:
@@ -348,22 +388,40 @@ async def mark_employee_leave(
             detail=f"Employee with number '{request.employee_no}' not found"
         )
     
-    # Check if attendance already exists today
+    # Full leave requires a date; half leave uses today
+    if request.leave_type == "full_leave":
+        if not request.leave_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Leave date is required for full leave"
+            )
+        try:
+            target_date = datetime.strptime(request.leave_date, "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid leave_date format. Use YYYY-MM-DD"
+            )
+
+    # Check if attendance already exists for target date
     attendance = db.query(Attendance).filter(
         Attendance.employee_no == request.employee_no,
-        Attendance.attendance_date == today
+        Attendance.attendance_date == target_date
     ).first()
     
     if request.leave_type == "half_leave":
-        parsed_time_in: Optional[time] = None
-        if request.time_in:
-            try:
-                parsed_time_in = datetime.strptime(request.time_in, "%H:%M").time()
-            except ValueError:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid time_in format. Use HH:MM"
-                )
+        if not request.time_in:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Time in is required for half leave"
+            )
+        try:
+            parsed_time_in = datetime.strptime(request.time_in, "%H:%M").time()
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid time_in format. Use HH:MM"
+            )
 
         if attendance and attendance.time_out:
             raise HTTPException(
@@ -372,32 +430,21 @@ async def mark_employee_leave(
             )
 
         if not attendance:
-            if not parsed_time_in:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Please enter time in first for {employee.name}"
-                )
             attendance = Attendance(
                 employee_no=request.employee_no,
-                attendance_date=today,
+                attendance_date=target_date,
                 time_in=parsed_time_in,
                 leave_type=request.leave_type,
                 device_id="MANUAL_LEAVE"
             )
             db.add(attendance)
         else:
-            if parsed_time_in:
-                attendance.time_in = parsed_time_in
-            if not attendance.time_in:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Please enter time in first for {employee.name}"
-                )
+            attendance.time_in = parsed_time_in
             attendance.leave_type = request.leave_type
             attendance.device_id = "MANUAL_LEAVE"
 
         half_minutes = int(get_shift_hours(employee.shift) * 60 / 2)
-        time_in_dt = datetime.combine(today, attendance.time_in)
+        time_in_dt = datetime.combine(target_date, attendance.time_in)
         time_out_dt = time_in_dt + timedelta(minutes=half_minutes)
         attendance.time_out = time_out_dt.time()
         attendance.total_work_minutes = half_minutes
@@ -415,7 +462,7 @@ async def mark_employee_leave(
         # Create new attendance record with leave
         attendance = Attendance(
             employee_no=request.employee_no,
-            attendance_date=today,
+            attendance_date=target_date,
             leave_type=request.leave_type,
             device_id="MANUAL_LEAVE"
         )
@@ -430,7 +477,7 @@ async def mark_employee_leave(
         id=attendance.id,
         employee_no=employee.employee_no,
         employee_name=employee.name,
-        attendance_date=today,
+        attendance_date=attendance.attendance_date,
         time_in=attendance.time_in,
         time_out=attendance.time_out,
         total_work_minutes=attendance.total_work_minutes or 0,

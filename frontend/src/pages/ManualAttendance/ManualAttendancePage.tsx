@@ -18,6 +18,18 @@ export function ManualAttendancePage() {
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeAttendanceStatus | null>(null);
   const [halfLeaveTimeIn, setHalfLeaveTimeIn] = useState('');
+  const [fullLeaveDate, setFullLeaveDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+  const [showTimeModal, setShowTimeModal] = useState(false);
+  const [timeAction, setTimeAction] = useState<'time_in' | 'time_out' | null>(null);
+  const [timeEmployee, setTimeEmployee] = useState<EmployeeAttendanceStatus | null>(null);
+  const [selectedTime, setSelectedTime] = useState('');
 
   // Get user role from token
   let isPrimaryAdmin = false;
@@ -35,12 +47,12 @@ export function ManualAttendancePage() {
 
   useEffect(() => {
     loadEmployees();
-  }, []);
+  }, [selectedDate]);
 
   const loadEmployees = async () => {
     try {
       setLoading(true);
-      const data = await manualAttendanceApi.getEmployeesStatus();
+      const data = await manualAttendanceApi.getEmployeesStatus(selectedDate);
       setEmployees(data);
     } catch (error) {
       toast.error('Failed to load employees');
@@ -49,28 +61,41 @@ export function ManualAttendancePage() {
     }
   };
 
-  const handleTimeIn = async (employeeNo: string) => {
-    try {
-      setMarking(employeeNo);
-      const response = await manualAttendanceApi.markTimeIn(employeeNo);
-      toast.success(response.message);
-      loadEmployees();
-    } catch (error) {
-      const errorMsg = (error as any)?.response?.data?.detail || 'Failed to mark time in';
-      toast.error(errorMsg);
-    } finally {
-      setMarking(null);
-    }
+  const getCurrentTimeString = () => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
   };
 
-  const handleTimeOut = async (employeeNo: string) => {
+  const openTimeModal = (emp: EmployeeAttendanceStatus, action: 'time_in' | 'time_out') => {
+    setTimeEmployee(emp);
+    setTimeAction(action);
+    setSelectedTime(getCurrentTimeString());
+    setShowTimeModal(true);
+  };
+
+  const handleConfirmTime = async () => {
+    if (!timeEmployee || !timeAction) return;
+    if (!selectedTime) {
+      toast.error('Please select a time');
+      return;
+    }
+
     try {
-      setMarking(employeeNo);
-      const response = await manualAttendanceApi.markTimeOut(employeeNo);
+      setMarking(timeEmployee.employee_no);
+      const response =
+        timeAction === 'time_in'
+          ? await manualAttendanceApi.markTimeIn(timeEmployee.employee_no, selectedTime, selectedDate)
+          : await manualAttendanceApi.markTimeOut(timeEmployee.employee_no, selectedTime, selectedDate);
       toast.success(response.message);
+      setShowTimeModal(false);
+      setTimeEmployee(null);
+      setTimeAction(null);
+      setSelectedTime('');
       loadEmployees();
     } catch (error) {
-      const errorMsg = (error as any)?.response?.data?.detail || 'Failed to mark time out';
+      const errorMsg = (error as any)?.response?.data?.detail || 'Failed to mark time';
       toast.error(errorMsg);
     } finally {
       setMarking(null);
@@ -113,6 +138,7 @@ export function ManualAttendancePage() {
   const handleLeaveClick = (emp: EmployeeAttendanceStatus) => {
     setSelectedEmployee(emp);
     setHalfLeaveTimeIn(emp.time_in ? emp.time_in.slice(0, 5) : '');
+    setFullLeaveDate(selectedDate);
     setShowLeaveModal(true);
   };
 
@@ -122,18 +148,24 @@ export function ManualAttendancePage() {
       toast.error('Time in is required for half leave');
       return;
     }
+    if (leaveType === 'full_leave' && !fullLeaveDate) {
+      toast.error('Leave date is required for full leave');
+      return;
+    }
 
     try {
       setMarking(selectedEmployee.employee_no);
       const response = await manualAttendanceApi.markLeave(
         selectedEmployee.employee_no,
         leaveType,
-        leaveType === 'half_leave' ? halfLeaveTimeIn : undefined
+        leaveType === 'half_leave' ? halfLeaveTimeIn : undefined,
+        leaveType === 'full_leave' ? fullLeaveDate : undefined
       );
       toast.success(response.message);
       setShowLeaveModal(false);
       setSelectedEmployee(null);
       setHalfLeaveTimeIn('');
+      setFullLeaveDate('');
       loadEmployees();
     } catch (error) {
       const errorMsg = (error as any)?.response?.data?.detail || 'Failed to mark leave';
@@ -195,13 +227,21 @@ export function ManualAttendancePage() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Manual Attendance</h2>
           <p className="text-gray-500 mt-1">
-            {format(new Date(), 'EEEE, MMMM d, yyyy')}
+            {format(new Date(`${selectedDate}T00:00:00`), 'EEEE, MMMM d, yyyy')}
           </p>
         </div>
-        <Button onClick={loadEmployees} variant="secondary" className="flex items-center gap-2">
-          <RefreshCw className="w-4 h-4" />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-3">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
+          <Button onClick={loadEmployees} variant="secondary" className="flex items-center gap-2">
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -297,7 +337,7 @@ export function ManualAttendancePage() {
                         {emp.status === 'not_marked' && (
                           <>
                             <Button
-                              onClick={() => handleTimeIn(emp.employee_no)}
+                              onClick={() => openTimeModal(emp, 'time_in')}
                               loading={marking === emp.employee_no}
                               className="flex items-center gap-1 text-sm"
                             >
@@ -318,7 +358,7 @@ export function ManualAttendancePage() {
                         )}
                         {emp.status === 'time_in_only' && (
                           <Button
-                            onClick={() => handleTimeOut(emp.employee_no)}
+                            onClick={() => openTimeModal(emp, 'time_out')}
                             loading={marking === emp.employee_no}
                             className="flex items-center gap-1 text-sm bg-orange-600 hover:bg-orange-700"
                           >
@@ -440,8 +480,10 @@ export function ManualAttendancePage() {
             Mark leave for {selectedEmployee?.name} ({selectedEmployee?.employee_no})
           </p>
 
-          <div className="grid grid-cols-1 gap-4">
-            <div>
+          {/* Half Leave Section */}
+          <div className="border border-yellow-200 rounded-lg p-4 bg-yellow-50">
+            <h4 className="font-medium text-yellow-800 mb-3">Half Leave</h4>
+            <div className="mb-3">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Time In (HH:MM)
               </label>
@@ -452,20 +494,33 @@ export function ManualAttendancePage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Required for half leave. Time out will be auto-calculated.
+                Time out will be auto-calculated based on shift.
               </p>
             </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
             <Button
               onClick={() => handleMarkLeave('half_leave')}
               loading={marking === selectedEmployee?.employee_no}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 bg-yellow-600 hover:bg-yellow-700"
             >
               <Calendar className="w-4 h-4" />
-              Half Leave
+              Mark Half Leave
             </Button>
+          </div>
+
+          {/* Full Leave Section */}
+          <div className="border border-red-200 rounded-lg p-4 bg-red-50">
+            <h4 className="font-medium text-red-800 mb-3">Full Leave</h4>
+            <div className="mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Leave Date
+              </label>
+              <input
+                type="date"
+                value={fullLeaveDate}
+                onChange={(e) => setFullLeaveDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
+            </div>
             <Button
               onClick={() => handleMarkLeave('full_leave')}
               loading={marking === selectedEmployee?.employee_no}
@@ -473,7 +528,7 @@ export function ManualAttendancePage() {
               className="flex items-center gap-1"
             >
               <Calendar className="w-4 h-4" />
-              Full Leave
+              Mark Full Leave
             </Button>
           </div>
 
@@ -484,6 +539,49 @@ export function ManualAttendancePage() {
               disabled={marking === selectedEmployee?.employee_no}
             >
               Cancel
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Time Selection Modal */}
+      <Modal
+        isOpen={showTimeModal}
+        onClose={() => setShowTimeModal(false)}
+        title={timeAction === 'time_in' ? 'Select Time In' : 'Select Time Out'}
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            {timeAction === 'time_in' ? 'Select time in for' : 'Select time out for'}{' '}
+            {timeEmployee?.name} ({timeEmployee?.employee_no})
+          </p>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Time (HH:MM)
+            </label>
+            <input
+              type="time"
+              value={selectedTime}
+              onChange={(e) => setSelectedTime(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              variant="secondary"
+              onClick={() => setShowTimeModal(false)}
+              disabled={marking === timeEmployee?.employee_no}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmTime}
+              loading={marking === timeEmployee?.employee_no}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Confirm
             </Button>
           </div>
         </div>
