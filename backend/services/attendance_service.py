@@ -128,6 +128,7 @@ class AttendanceService:
                 "total_work_minutes": attendance.total_work_minutes,
                 "overtime": attendance.overtime,
                 "overtime_minutes": attendance.overtime_minutes,
+                "leave_type": attendance.leave_type,
                 "device_id": attendance.device_id
             })
         
@@ -232,6 +233,7 @@ class AttendanceService:
                 "total_work_minutes": attendance.total_work_minutes,
                 "overtime": attendance.overtime,
                 "overtime_minutes": attendance.overtime_minutes,
+                "leave_type": attendance.leave_type,
                 "device_id": attendance.device_id
             })
         

@@ -311,6 +311,7 @@ async def get_attendance(
                 total_work_minutes=record.total_work_minutes,
                 overtime=record.overtime,
                 overtime_minutes=record.overtime_minutes,
+                leave_type=record.leave_type,
                 device_id=record.device_id
             ))
         

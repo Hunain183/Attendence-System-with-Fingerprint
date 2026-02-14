@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   format,
   startOfMonth,
@@ -16,10 +16,16 @@ import {
   Badge,
 } from '../../../components/ui';
 import { attendanceApi, employeeApi } from '../../../api';
-import { Attendance, DailyAttendanceSummary } from '../../../types';
+import { Attendance, DailyAttendanceSummary, Employee } from '../../../types';
 import toast from 'react-hot-toast';
 
 type ReportType = 'daily' | 'monthly';
+type StatusFilter = '' | 'present' | 'absent' | 'half_leave' | 'full_leave';
+type AttendanceStatus = 'present' | 'absent' | 'half_leave' | 'full_leave';
+type AttendanceReportRow = Omit<Attendance, 'id'> & {
+  id: string | number;
+  status: AttendanceStatus;
+};
 
 const departments = [
   { value: '', label: 'All Departments' },
@@ -42,25 +48,69 @@ export function AttendanceReports() {
     format(new Date(), 'yyyy-MM')
   );
   const [department, setDepartment] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
   const [loading, setLoading] = useState(false);
 
   // Daily report data
   const [dailySummary, setDailySummary] = useState<DailyAttendanceSummary | null>(null);
   const [dailyRecords, setDailyRecords] = useState<Attendance[]>([]);
+  const [dailyEmployees, setDailyEmployees] = useState<Employee[]>([]);
 
   // Monthly report data
   const [monthlyData, setMonthlyData] = useState<
     { date: string; present: number; absent: number }[]
   >([]);
   const [monthlyRecords, setMonthlyRecords] = useState<Attendance[]>([]);
+  const [monthlyEmployees, setMonthlyEmployees] = useState<Employee[]>([]);
   const [totalEmployees, setTotalEmployees] = useState(0);
+
+  const loadAllEmployees = useCallback(
+    async (departmentFilter?: string) => {
+      const limit = 500;
+      let skip = 0;
+      let employees: Employee[] = [];
+
+      while (true) {
+        const response = await employeeApi.getAll(skip, limit, departmentFilter ? { department: departmentFilter } : undefined);
+        employees = employees.concat(response.employees);
+        if (employees.length >= response.total || response.employees.length < limit) {
+          break;
+        }
+        skip += limit;
+      }
+
+      return employees;
+    },
+    []
+  );
+
+  const loadAllAttendance = useCallback(
+    async (params: { start_date: string; end_date: string; department?: string }) => {
+      const limit = 500;
+      let skip = 0;
+      let records: Attendance[] = [];
+
+      while (true) {
+        const response = await attendanceApi.getAll(skip, limit, params);
+        records = records.concat(response.records);
+        if (records.length >= response.total || response.records.length < limit) {
+          break;
+        }
+        skip += limit;
+      }
+
+      return { records, total: records.length };
+    },
+    []
+  );
 
   const fetchDailyReport = useCallback(async () => {
     try {
       setLoading(true);
-      const [summary, records] = await Promise.all([
+      const [summary, records, employees] = await Promise.all([
         attendanceApi.getSummary(selectedDate),
         attendanceApi.getByDate(selectedDate, 0, 500),
+        loadAllEmployees(department || undefined),
       ]);
       setDailySummary(summary);
       setDailyRecords(
@@ -68,6 +118,7 @@ export function AttendanceReports() {
           ? records.records.filter((r) => r.department === department)
           : records.records
       );
+      setDailyEmployees(employees);
     } catch (error) {
       toast.error('Failed to load daily report');
       console.error(error);
@@ -83,16 +134,17 @@ export function AttendanceReports() {
       const startDate = startOfMonth(new Date(year, month - 1));
       const endDate = endOfMonth(new Date(year, month - 1));
 
-      const [employeesData, attendanceData] = await Promise.all([
-        employeeApi.getAll(0, 1),
-        attendanceApi.getAll(0, 1000, {
+      const [employees, attendanceData] = await Promise.all([
+        loadAllEmployees(department || undefined),
+        loadAllAttendance({
           start_date: format(startDate, 'yyyy-MM-dd'),
           end_date: format(endDate, 'yyyy-MM-dd'),
           department: department || undefined,
         }),
       ]);
 
-      setTotalEmployees(employeesData.total);
+      setTotalEmployees(employees.length);
+      setMonthlyEmployees(employees);
       setMonthlyRecords(attendanceData.records);
 
       // Calculate daily stats for the month
@@ -105,7 +157,7 @@ export function AttendanceReports() {
         return {
           date: dateStr,
           present: dayRecords.length,
-          absent: employeesData.total - dayRecords.length,
+          absent: employees.length - dayRecords.length,
         };
       });
 
@@ -128,7 +180,7 @@ export function AttendanceReports() {
 
 
   const handlePrint = () => {
-    const records = reportType === 'daily' ? dailyRecords : monthlyRecords;
+    const records = reportType === 'daily' ? filteredDailyRows : filteredMonthlyRows;
     
     if (records.length === 0) {
       toast.error('No data to print');
@@ -146,6 +198,7 @@ export function AttendanceReports() {
         <td>${r.employee_no}</td>
         <td>${r.employee_name}</td>
         <td>${r.department || '-'}</td>
+        <td>${getStatusText(r)}</td>
         <td>${r.time_in ? r.time_in.slice(0, 5) : '-'}</td>
         <td>${r.time_out ? r.time_out.slice(0, 5) : '-'}</td>
         <td>${r.total_work_minutes ? `${Math.floor(r.total_work_minutes / 60)}h ${r.total_work_minutes % 60}m` : '-'}</td>
@@ -213,7 +266,9 @@ export function AttendanceReports() {
               <th>Date</th>
               <th>Employee No</th>
               <th>Name</th>
-              <th>Department</th>\n              <th>Time In</th>
+              <th>Department</th>
+              <th>Status</th>
+              <th>Time In</th>
               <th>Time Out</th>
               <th>Total Hours</th>
               <th>Overtime</th>
@@ -243,36 +298,158 @@ export function AttendanceReports() {
     return `${hours}h ${mins}m`;
   };
 
+  const getRecordStatus = (record: Attendance): AttendanceStatus => {
+    if (record.leave_type === 'half_leave') return 'half_leave';
+    if (record.leave_type === 'full_leave') return 'full_leave';
+    return 'present';
+  };
+
+  const getStatusText = (row: AttendanceReportRow) => {
+    if (row.status === 'absent') return 'Absent';
+    if (row.status === 'half_leave') return 'Half Leave';
+    if (row.status === 'full_leave') return 'Full Leave';
+    return 'Present';
+  };
+
+  const dailyRows = useMemo<AttendanceReportRow[]>(() => {
+    if (dailyEmployees.length === 0) return [];
+    const recordMap = new Map(
+      dailyRecords.map((record) => [record.employee_no, record])
+    );
+
+    return dailyEmployees.map((employee) => {
+      const record = recordMap.get(employee.employee_no);
+      if (record) {
+        return {
+          ...record,
+          status: getRecordStatus(record),
+        };
+      }
+
+      return {
+        id: `absent-${employee.employee_no}-${selectedDate}`,
+        employee_no: employee.employee_no,
+        employee_name: employee.name,
+        department: employee.department,
+        designation: employee.designation,
+        attendance_date: selectedDate,
+        time_in: null,
+        time_out: null,
+        total_work_minutes: 0,
+        overtime: false,
+        overtime_minutes: 0,
+        leave_type: null,
+        device_id: null,
+        status: 'absent',
+      };
+    });
+  }, [dailyEmployees, dailyRecords, selectedDate]);
+
+  const monthlyRows = useMemo<AttendanceReportRow[]>(() => {
+    if (monthlyEmployees.length === 0) return [];
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const startDate = startOfMonth(new Date(year, month - 1));
+    const endDate = endOfMonth(new Date(year, month - 1));
+    const days = eachDayOfInterval({ start: startDate, end: endDate });
+    const recordMap = new Map(
+      monthlyRecords.map((record) => [
+        `${record.employee_no}-${record.attendance_date}`,
+        record,
+      ])
+    );
+
+    const rows: AttendanceReportRow[] = [];
+
+    days.forEach((day) => {
+      const dateStr = format(day, 'yyyy-MM-dd');
+      monthlyEmployees.forEach((employee) => {
+        const record = recordMap.get(`${employee.employee_no}-${dateStr}`);
+        if (record) {
+          rows.push({
+            ...record,
+            status: getRecordStatus(record),
+          });
+        } else {
+          rows.push({
+            id: `absent-${employee.employee_no}-${dateStr}`,
+            employee_no: employee.employee_no,
+            employee_name: employee.name,
+            department: employee.department,
+            designation: employee.designation,
+            attendance_date: dateStr,
+            time_in: null,
+            time_out: null,
+            total_work_minutes: 0,
+            overtime: false,
+            overtime_minutes: 0,
+            leave_type: null,
+            device_id: null,
+            status: 'absent',
+          });
+        }
+      });
+    });
+
+    return rows;
+  }, [monthlyEmployees, monthlyRecords, selectedMonth]);
+
+  const filteredDailyRows = useMemo(() => {
+    if (!statusFilter) return dailyRows;
+    return dailyRows.filter((row) => row.status === statusFilter);
+  }, [dailyRows, statusFilter]);
+
+  const filteredMonthlyRows = useMemo(() => {
+    if (!statusFilter) return monthlyRows;
+    return monthlyRows.filter((row) => row.status === statusFilter);
+  }, [monthlyRows, statusFilter]);
+
   const columns = [
     {
       key: 'attendance_date',
       header: 'Date',
-      render: (item: Attendance) =>
+      render: (item: AttendanceReportRow) =>
         format(new Date(item.attendance_date), 'MMM d, yyyy'),
     },
     { key: 'employee_no', header: 'Emp No' },
     { key: 'employee_name', header: 'Name' },
     { key: 'department', header: 'Department' },
     {
+      key: 'status',
+      header: 'Status',
+      render: (item: AttendanceReportRow) => (
+        <Badge
+          variant={
+            item.status === 'present'
+              ? 'success'
+              : item.status === 'half_leave' || item.status === 'full_leave'
+              ? 'warning'
+              : 'danger'
+          }
+        >
+          {getStatusText(item)}
+        </Badge>
+      ),
+    },
+    {
       key: 'time_in',
       header: 'Time In',
-      render: (item: Attendance) => formatTime(item.time_in),
+      render: (item: AttendanceReportRow) => formatTime(item.time_in),
     },
     {
       key: 'time_out',
       header: 'Time Out',
-      render: (item: Attendance) => formatTime(item.time_out),
+      render: (item: AttendanceReportRow) => formatTime(item.time_out),
     },
     {
       key: 'total_work_minutes',
       header: 'Total',
-      render: (item: Attendance) =>
+      render: (item: AttendanceReportRow) =>
         item.total_work_minutes ? formatMinutes(item.total_work_minutes) : '-',
     },
     {
       key: 'overtime',
       header: 'Overtime',
-      render: (item: Attendance) => (
+      render: (item: AttendanceReportRow) => (
         <Badge variant={item.overtime ? 'success' : 'default'}>
           {item.overtime ? `+${formatMinutes(item.overtime_minutes)}` : 'No'}
         </Badge>
@@ -301,7 +478,7 @@ export function AttendanceReports() {
 
       {/* Filters */}
       <Card>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <Select
             label="Report Type"
             value={reportType}
@@ -335,6 +512,18 @@ export function AttendanceReports() {
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
             options={departments}
+          />
+          <Select
+            label="Status"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+            options={[
+              { value: '', label: 'All Statuses' },
+              { value: 'present', label: 'Present' },
+              { value: 'absent', label: 'Absent' },
+              { value: 'half_leave', label: 'Half Leave' },
+              { value: 'full_leave', label: 'Full Leave' },
+            ]}
           />
         </div>
       </Card>
@@ -457,7 +646,7 @@ export function AttendanceReports() {
         </div>
         <Table
           columns={columns}
-          data={reportType === 'daily' ? dailyRecords : monthlyRecords}
+          data={reportType === 'daily' ? filteredDailyRows : filteredMonthlyRows}
           keyExtractor={(item) => item.id}
           loading={loading}
           emptyMessage="No records found"

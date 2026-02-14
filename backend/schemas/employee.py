@@ -30,7 +30,8 @@ class EmployeeCreate(BaseModel):
     hod: Optional[str] = Field(None, max_length=100, description="Head of Department")
     sub_department: Optional[str] = Field(None, max_length=100)
     date_of_joining: Optional[datetime] = None
-    shift: Optional[str] = Field(None, max_length=1, description="D=12h, A/B/C/G=8h")
+    shift: Optional[str] = Field(None, max_length=10, description="A(12), B(12), E, G(Off), G, M, N")
+    is_overtime: Optional[bool] = Field(True, description="Calculate overtime for this employee")
     rest_day: Optional[str] = Field(None, max_length=50, description="e.g., Friday, Saturday")
     quit_date: Optional[datetime] = None
     remarks: Optional[str] = None
@@ -70,7 +71,8 @@ class EmployeeUpdate(BaseModel):
     hod: Optional[str] = Field(None, max_length=100)
     sub_department: Optional[str] = Field(None, max_length=100)
     date_of_joining: Optional[datetime] = None
-    shift: Optional[str] = Field(None, max_length=1)
+    shift: Optional[str] = Field(None, max_length=10)
+    is_overtime: Optional[bool] = None
     rest_day: Optional[str] = Field(None, max_length=50)
     quit_date: Optional[datetime] = None
     remarks: Optional[str] = None
@@ -120,6 +122,7 @@ class EmployeeResponse(BaseModel):
     sub_department: Optional[str] = None
     date_of_joining: Optional[datetime] = None
     shift: Optional[str] = None
+    is_overtime: Optional[bool] = None
     rest_day: Optional[str] = None
     quit_date: Optional[datetime] = None
     remarks: Optional[str] = None

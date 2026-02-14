@@ -388,13 +388,14 @@ async def mark_employee_leave(
             detail=f"Employee with number '{request.employee_no}' not found"
         )
     
-    # Full leave requires a date; half leave uses today
-    if request.leave_type == "full_leave":
-        if not request.leave_date:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Leave date is required for full leave"
-            )
+    # Full leave requires a date; half leave can use provided date or today
+    if request.leave_type == "full_leave" and not request.leave_date:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Leave date is required for full leave"
+        )
+
+    if request.leave_date:
         try:
             target_date = datetime.strptime(request.leave_date, "%Y-%m-%d").date()
         except ValueError:

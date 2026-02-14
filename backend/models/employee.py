@@ -1,7 +1,7 @@
 """
 Employee model - Master table for employee data.
 """
-from sqlalchemy import Column, Integer, String, DateTime, Text
+from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -48,7 +48,8 @@ class Employee(Base):
     hod = Column(String(100), nullable=True)  # Head of Department
     sub_department = Column(String(100), nullable=True)
     date_of_joining = Column(DateTime, nullable=True)
-    shift = Column(String(1), nullable=True)  # D=12h, A/B/C/G=8h
+    shift = Column(String(10), nullable=True)  # A(12), B(12), E, G(Off), G, M, N
+    is_overtime = Column(Boolean, nullable=True, default=True)  # Calculate overtime for this employee
     rest_day = Column(String(50), nullable=True)  # e.g., Friday, Saturday
     quit_date = Column(DateTime, nullable=True)
     remarks = Column(Text, nullable=True)

@@ -29,11 +29,13 @@ const departments = [
 ];
 
 const shifts = [
-  { value: 'D', label: 'D - 12 Hours' },
-  { value: 'A', label: 'A - 8 Hours' },
-  { value: 'B', label: 'B - 8 Hours' },
-  { value: 'C', label: 'C - 8 Hours' },
-  { value: 'G', label: 'G - 8 Hours' },
+  { value: 'A(12)', label: 'A(12) - 6:00 AM - 6:00 PM (12h)' },
+  { value: 'B(12)', label: 'B(12) - 6:00 PM - 6:00 AM (12h)' },
+  { value: 'E', label: 'E - 2:00 PM - 10:00 PM (8h)' },
+  { value: 'G(Off)', label: 'G(Off) - 9:00 AM - 5:30 PM (8.5h)' },
+  { value: 'G', label: 'G - 8:00 AM - 4:00 PM (8h)' },
+  { value: 'M', label: 'M - 6:00 AM - 2:00 PM (8h)' },
+  { value: 'N', label: 'N - 10:00 PM - 6:00 AM (8h)' },
 ];
 
 const restDays = [
@@ -98,6 +100,7 @@ export function EmployeeModal({
     sub_department: '',
     date_of_joining: '',
     shift: '',
+    is_overtime: true,
     rest_day: '',
     quit_date: '',
     remarks: '',
@@ -144,6 +147,7 @@ export function EmployeeModal({
           ? employee.date_of_joining.split('T')[0]
           : '',
         shift: employee.shift || '',
+        is_overtime: employee.is_overtime !== false,
         rest_day: employee.rest_day || '',
         quit_date: employee.quit_date ? employee.quit_date.split('T')[0] : '',
         remarks: employee.remarks || '',
@@ -186,6 +190,7 @@ export function EmployeeModal({
         sub_department: '',
         date_of_joining: '',
         shift: '',
+        is_overtime: true,
         rest_day: '',
         quit_date: '',
         remarks: '',
@@ -503,6 +508,17 @@ export function EmployeeModal({
               onChange={handleChange}
               options={shifts}
               placeholder="Select shift"
+            />
+            <Select
+              label="Is Overtime"
+              name="is_overtime"
+              value={formData.is_overtime ? 'yes' : 'no'}
+              onChange={(e) => setFormData({ ...formData, is_overtime: e.target.value === 'yes' })}
+              options={[
+                { value: 'yes', label: 'Yes - Calculate Overtime' },
+                { value: 'no', label: 'No - No Overtime' },
+              ]}
+              placeholder="Calculate overtime?"
             />
             <Select
               label="Rest Day"

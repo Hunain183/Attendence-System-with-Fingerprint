@@ -76,11 +76,17 @@ class Attendance(Base):
     def update_overtime(self):
         """
         Update overtime status based on total work minutes and employee shift.
-        Uses shift-based work hours (D=12h, A/B/C/G=8h).
+        Only calculates if employee has is_overtime enabled.
         """
         from utils.shifts import calculate_overtime
         
         if not self.total_work_minutes:
+            self.overtime = False
+            self.overtime_minutes = 0
+            return
+        
+        # Check if employee has overtime calculation enabled
+        if self.employee and self.employee.is_overtime is False:
             self.overtime = False
             self.overtime_minutes = 0
             return

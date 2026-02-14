@@ -159,7 +159,7 @@ export function ManualAttendancePage() {
         selectedEmployee.employee_no,
         leaveType,
         leaveType === 'half_leave' ? halfLeaveTimeIn : undefined,
-        leaveType === 'full_leave' ? fullLeaveDate : undefined
+        leaveType === 'full_leave' ? fullLeaveDate : selectedDate
       );
       toast.success(response.message);
       setShowLeaveModal(false);

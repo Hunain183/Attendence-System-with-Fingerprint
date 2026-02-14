@@ -21,6 +21,7 @@ export interface Employee {
   sub_department: string | null;
   date_of_joining: string | null;
   shift: string | null;
+  is_overtime: boolean | null;
   rest_day: string | null;
   quit_date: string | null;
   remarks: string | null;
@@ -63,6 +64,7 @@ export interface EmployeeCreate {
   sub_department?: string;
   date_of_joining?: string;
   shift?: string;
+  is_overtime?: boolean;
   rest_day?: string;
   quit_date?: string;
   remarks?: string;
@@ -106,6 +108,7 @@ export interface Attendance {
   total_work_minutes: number;
   overtime: boolean;
   overtime_minutes: number;
+  leave_type: string | null;
   device_id: string | null;
 }
 
