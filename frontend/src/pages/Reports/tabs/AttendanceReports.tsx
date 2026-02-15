@@ -48,6 +48,7 @@ export function AttendanceReports() {
     format(new Date(), 'yyyy-MM')
   );
   const [department, setDepartment] = useState('');
+  const [employeeFilter, setEmployeeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
   const [loading, setLoading] = useState(false);
 
@@ -55,6 +56,7 @@ export function AttendanceReports() {
   const [dailySummary, setDailySummary] = useState<DailyAttendanceSummary | null>(null);
   const [dailyRecords, setDailyRecords] = useState<Attendance[]>([]);
   const [dailyEmployees, setDailyEmployees] = useState<Employee[]>([]);
+  const [reportEmployees, setReportEmployees] = useState<Employee[]>([]);
 
   // Monthly report data
   const [monthlyData, setMonthlyData] = useState<
@@ -119,6 +121,7 @@ export function AttendanceReports() {
           : records.records
       );
       setDailyEmployees(employees);
+      setReportEmployees(employees);
     } catch (error) {
       toast.error('Failed to load daily report');
       console.error(error);
@@ -145,6 +148,7 @@ export function AttendanceReports() {
 
       setTotalEmployees(employees.length);
       setMonthlyEmployees(employees);
+      setReportEmployees(employees);
       setMonthlyRecords(attendanceData.records);
 
       // Calculate daily stats for the month
@@ -180,7 +184,9 @@ export function AttendanceReports() {
 
 
   const handlePrint = () => {
-    const records = reportType === 'daily' ? filteredDailyRows : filteredMonthlyRows;
+    const records = reportType === 'daily'
+      ? employeeFilteredDailyRows
+      : employeeFilteredMonthlyRows;
     
     if (records.length === 0) {
       toast.error('No data to print');
@@ -207,6 +213,18 @@ export function AttendanceReports() {
     `
       )
       .join('');
+
+    const selectedEmployee = reportEmployees.find(
+      (employee) => employee.employee_no === employeeFilter
+    );
+
+    const employeeHeader = selectedEmployee
+      ? `
+        <p>Employee No: ${selectedEmployee.employee_no}</p>
+        <p>Name: ${selectedEmployee.name}</p>
+        <p>Designation: ${selectedEmployee.designation || '-'}</p>
+      `
+      : '';
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -247,7 +265,10 @@ export function AttendanceReports() {
               margin: 0;
             }
             table {
-              page-break-inside: avoid;
+              page-break-inside: auto;
+            }
+            thead {
+              display: table-header-group;
             }
             tr {
               page-break-inside: avoid;
@@ -258,6 +279,7 @@ export function AttendanceReports() {
       <body>
         <h1>Attendance Report</h1>
         <p>Report Type: ${reportType === 'daily' ? `Daily - ${selectedDate}` : `Monthly - ${selectedMonth}`}</p>
+        ${employeeHeader}
         <p>Total Records: ${records.length}</p>
         <p>Generated on: ${new Date().toLocaleString()}</p>
         <table>
@@ -403,6 +425,16 @@ export function AttendanceReports() {
     return monthlyRows.filter((row) => row.status === statusFilter);
   }, [monthlyRows, statusFilter]);
 
+  const employeeFilteredDailyRows = useMemo(() => {
+    if (!employeeFilter) return filteredDailyRows;
+    return filteredDailyRows.filter((row) => row.employee_no === employeeFilter);
+  }, [filteredDailyRows, employeeFilter]);
+
+  const employeeFilteredMonthlyRows = useMemo(() => {
+    if (!employeeFilter) return filteredMonthlyRows;
+    return filteredMonthlyRows.filter((row) => row.employee_no === employeeFilter);
+  }, [filteredMonthlyRows, employeeFilter]);
+
   const columns = [
     {
       key: 'attendance_date',
@@ -478,7 +510,7 @@ export function AttendanceReports() {
 
       {/* Filters */}
       <Card>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
           <Select
             label="Report Type"
             value={reportType}
@@ -512,6 +544,18 @@ export function AttendanceReports() {
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
             options={departments}
+          />
+          <Select
+            label="Employee"
+            value={employeeFilter}
+            onChange={(e) => setEmployeeFilter(e.target.value)}
+            options={[
+              { value: '', label: 'All Employees' },
+              ...reportEmployees.map((employee) => ({
+                value: employee.employee_no,
+                label: `${employee.employee_no} - ${employee.name}`,
+              })),
+            ]}
           />
           <Select
             label="Status"
@@ -643,10 +687,31 @@ export function AttendanceReports() {
           <h3 className="text-lg font-semibold text-gray-900">
             {reportType === 'daily' ? 'Daily Records' : 'Monthly Records'}
           </h3>
+          {employeeFilter && (
+            <div className="mt-2 text-sm text-gray-600">
+              {(() => {
+                const selected = reportEmployees.find(
+                  (employee) => employee.employee_no === employeeFilter
+                );
+                if (!selected) return null;
+                return (
+                  <div>
+                    <div>Employee No: {selected.employee_no}</div>
+                    <div>Name: {selected.name}</div>
+                    <div>Designation: {selected.designation || '-'}</div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </div>
         <Table
           columns={columns}
-          data={reportType === 'daily' ? filteredDailyRows : filteredMonthlyRows}
+          data={
+            reportType === 'daily'
+              ? employeeFilteredDailyRows
+              : employeeFilteredMonthlyRows
+          }
           keyExtractor={(item) => item.id}
           loading={loading}
           emptyMessage="No records found"
