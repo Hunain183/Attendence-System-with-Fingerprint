@@ -47,6 +47,8 @@ export function AttendanceReports() {
   const [selectedMonth, setSelectedMonth] = useState(
     format(new Date(), 'yyyy-MM')
   );
+  const [rangeStart, setRangeStart] = useState('');
+  const [rangeEnd, setRangeEnd] = useState('');
   const [department, setDepartment] = useState('');
   const [employeeFilter, setEmployeeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('');
@@ -106,6 +108,22 @@ export function AttendanceReports() {
     []
   );
 
+  const getMonthlyRange = useCallback(() => {
+    if (rangeStart && rangeEnd) {
+      const startDate = new Date(rangeStart);
+      const endDate = new Date(rangeEnd);
+      if (!Number.isNaN(startDate.getTime()) && !Number.isNaN(endDate.getTime()) && startDate <= endDate) {
+        return { startDate, endDate };
+      }
+    }
+
+    const [year, month] = selectedMonth.split('-').map(Number);
+    return {
+      startDate: startOfMonth(new Date(year, month - 1)),
+      endDate: endOfMonth(new Date(year, month - 1)),
+    };
+  }, [rangeStart, rangeEnd, selectedMonth]);
+
   const fetchDailyReport = useCallback(async () => {
     try {
       setLoading(true);
@@ -133,9 +151,7 @@ export function AttendanceReports() {
   const fetchMonthlyReport = useCallback(async () => {
     try {
       setLoading(true);
-      const [year, month] = selectedMonth.split('-').map(Number);
-      const startDate = startOfMonth(new Date(year, month - 1));
-      const endDate = endOfMonth(new Date(year, month - 1));
+      const { startDate, endDate } = getMonthlyRange();
 
       const [employees, attendanceData] = await Promise.all([
         loadAllEmployees(department || undefined),
@@ -172,7 +188,7 @@ export function AttendanceReports() {
     } finally {
       setLoading(false);
     }
-  }, [selectedMonth, department]);
+  }, [selectedMonth, department, getMonthlyRange]);
 
   useEffect(() => {
     if (reportType === 'daily') {
@@ -226,6 +242,12 @@ export function AttendanceReports() {
       `
       : '';
 
+    const reportLabel = reportType === 'daily'
+      ? `Daily - ${selectedDate}`
+      : rangeStart && rangeEnd
+      ? `Range - ${rangeStart} to ${rangeEnd}`
+      : `Monthly - ${selectedMonth}`;
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -278,7 +300,7 @@ export function AttendanceReports() {
       </head>
       <body>
         <h1>Attendance Report</h1>
-        <p>Report Type: ${reportType === 'daily' ? `Daily - ${selectedDate}` : `Monthly - ${selectedMonth}`}</p>
+        <p>Report Type: ${reportLabel}</p>
         ${employeeHeader}
         <p>Total Records: ${records.length}</p>
         <p>Generated on: ${new Date().toLocaleString()}</p>
@@ -369,9 +391,7 @@ export function AttendanceReports() {
 
   const monthlyRows = useMemo<AttendanceReportRow[]>(() => {
     if (monthlyEmployees.length === 0) return [];
-    const [year, month] = selectedMonth.split('-').map(Number);
-    const startDate = startOfMonth(new Date(year, month - 1));
-    const endDate = endOfMonth(new Date(year, month - 1));
+    const { startDate, endDate } = getMonthlyRange();
     const days = eachDayOfInterval({ start: startDate, end: endDate });
     const recordMap = new Map(
       monthlyRecords.map((record) => [
@@ -413,7 +433,7 @@ export function AttendanceReports() {
     });
 
     return rows;
-  }, [monthlyEmployees, monthlyRecords, selectedMonth]);
+  }, [monthlyEmployees, monthlyRecords, getMonthlyRange]);
 
   const filteredDailyRows = useMemo(() => {
     if (!statusFilter) return dailyRows;
@@ -510,18 +530,20 @@ export function AttendanceReports() {
 
       {/* Filters */}
       <Card>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-          <Select
-            label="Report Type"
-            value={reportType}
-            onChange={(e) => setReportType(e.target.value as ReportType)}
-            options={[
-              { value: 'daily', label: 'Daily Report' },
-              { value: 'monthly', label: 'Monthly Report' },
-            ]}
-          />
+        <div className="flex flex-wrap gap-4">
+          <div className="min-w-[180px] flex-1">
+            <Select
+              label="Report Type"
+              value={reportType}
+              onChange={(e) => setReportType(e.target.value as ReportType)}
+              options={[
+                { value: 'daily', label: 'Daily Report' },
+                { value: 'monthly', label: 'Monthly Report' },
+              ]}
+            />
+          </div>
           {reportType === 'daily' ? (
-            <div className="relative">
+            <div className="relative min-w-[200px] flex-1">
               <Calendar className="absolute left-3 top-8 h-5 w-5 text-gray-400" />
               <Input
                 label="Select Date"
@@ -532,43 +554,69 @@ export function AttendanceReports() {
               />
             </div>
           ) : (
-            <Input
-              label="Select Month"
-              type="month"
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-            />
+            <>
+              <div className="min-w-[180px] flex-1">
+                <Input
+                  label="Select Month"
+                  type="month"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                />
+              </div>
+              <div className="min-w-[180px] flex-1">
+                <Input
+                  label="From Date"
+                  type="date"
+                  value={rangeStart}
+                  onChange={(e) => setRangeStart(e.target.value)}
+                />
+              </div>
+              <div className="min-w-[180px] flex-1">
+                <Input
+                  label="To Date"
+                  type="date"
+                  value={rangeEnd}
+                  onChange={(e) => setRangeEnd(e.target.value)}
+                />
+              </div>
+            </>
           )}
-          <Select
-            label="Department"
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-            options={departments}
-          />
-          <Select
-            label="Employee"
-            value={employeeFilter}
-            onChange={(e) => setEmployeeFilter(e.target.value)}
-            options={[
-              { value: '', label: 'All Employees' },
-              ...reportEmployees.map((employee) => ({
-                value: employee.employee_no,
-                label: `${employee.employee_no} - ${employee.name}`,
-              })),
-            ]}
-          />
-          <Select
-            label="Status"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-            options={[
-              { value: '', label: 'All Statuses' },
-              { value: 'present', label: 'Present' },
-              { value: 'absent', label: 'Absent' },
-              { value: 'half_leave', label: 'Half Leave' },
-              { value: 'full_leave', label: 'Full Leave' },
-            ]}
-          />
+          <div className="min-w-[180px] flex-1">
+            <Select
+              label="Department"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              options={departments}
+            />
+          </div>
+          <div className="min-w-[220px] flex-1">
+            <Select
+              label="Employee"
+              value={employeeFilter}
+              onChange={(e) => setEmployeeFilter(e.target.value)}
+              options={[
+                { value: '', label: 'All Employees' },
+                ...reportEmployees.map((employee) => ({
+                  value: employee.employee_no,
+                  label: `${employee.employee_no} - ${employee.name}`,
+                })),
+              ]}
+            />
+          </div>
+          <div className="min-w-[180px] flex-1">
+            <Select
+              label="Status"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+              options={[
+                { value: '', label: 'All Statuses' },
+                { value: 'present', label: 'Present' },
+                { value: 'absent', label: 'Absent' },
+                { value: 'half_leave', label: 'Half Leave' },
+                { value: 'full_leave', label: 'Full Leave' },
+              ]}
+            />
+          </div>
         </div>
       </Card>
 

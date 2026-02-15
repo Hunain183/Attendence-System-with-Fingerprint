@@ -80,9 +80,15 @@ export function EmployeeReports() {
     }));
   };
 
+  const normalizeDateString = (value?: string | null) => {
+    if (!value) return null;
+    return value.includes('T') ? value.split('T')[0] : value;
+  };
+
   const formatDate = (dateStr?: string | null) => {
-    if (!dateStr) return '-';
-    return format(new Date(dateStr), 'MMM d, yyyy');
+    const normalized = normalizeDateString(dateStr);
+    if (!normalized) return '-';
+    return format(new Date(normalized), 'MMM d, yyyy');
   };
 
   const formatCurrency = (value?: number | null) => {
@@ -101,8 +107,9 @@ export function EmployeeReports() {
   };
 
   const printableDate = (value?: string | null) => {
-    if (!value) return '________________';
-    return format(new Date(value), 'MMM d, yyyy');
+    const normalized = normalizeDateString(value);
+    if (!normalized) return '________________';
+    return format(new Date(normalized), 'MMM d, yyyy');
   };
 
   const printablePicture = (value?: string | null) => {
@@ -134,7 +141,7 @@ export function EmployeeReports() {
         <td>${e.employee_no}</td>
         <td>${e.name}</td>
         <td>${e.father_name || '-'}</td>
-        <td>${e.date_of_birth || '-'}</td>
+        <td>${formatDate(e.date_of_birth)}</td>
         <td>${e.cnic || '-'}</td>
         <td>${e.phone_number || '-'}</td>
         <td>${e.permanent_address || '-'}</td>
@@ -146,7 +153,7 @@ export function EmployeeReports() {
         <td>${e.employment_type || '-'}</td>
         <td>${e.department || '-'}</td>
         <td>${e.designation || '-'}</td>
-        <td>${e.date_of_joining || '-'}</td>
+        <td>${formatDate(e.date_of_joining)}</td>
         <td>${e.shift || '-'}</td>
       </tr>
     `
