@@ -5,15 +5,18 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 // - In production (compiled exe): API is on same origin, no prefix needed
 const getBaseURL = () => {
   // If VITE_API_URL is set, use it
+  // If VITE_API_URL is set, use it
   if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+    return import.meta.env.VITE_API_URL as string;
   }
-  
-  // In production mode (built), API is on same origin
+
+  // In production mode (built), prefer a configured backend domain.
+  // If VITE_API_URL was not provided at build time (common when env not set),
+  // fall back to the known backend domain to avoid same-origin 404s.
   if (import.meta.env.PROD) {
-    return '';
+    return 'https://attendence-system-with-fingerprint-backend.vercel.app';
   }
-  
+
   // In development, use /api prefix for Vite proxy
   return '/api';
 };
