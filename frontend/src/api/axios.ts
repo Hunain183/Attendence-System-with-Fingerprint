@@ -1,23 +1,19 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-// Determine base URL:
-// - In development: use /api prefix (proxied by Vite)
-// - In production (compiled exe): API is on same origin, no prefix needed
+// Determine base URL for API requests
 const getBaseURL = () => {
-  // If VITE_API_URL is set, use it
-  // If VITE_API_URL is set, use it
+  // Priority 1: Use VITE_API_URL environment variable if set
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL as string;
   }
 
-  // In production mode (built), prefer a configured backend domain.
-  // If VITE_API_URL was not provided at build time (common when env not set),
-  // fall back to the known backend domain to avoid same-origin 404s.
-  if (import.meta.env.PROD) {
-    return 'https://attendence-system-with-fingerprint-backend.vercel.app';
+  // Priority 2: In development with Vite, use /api prefix (proxied by Vite dev server)
+  if (!import.meta.env.PROD) {
+    return '/api';
   }
 
-  // In development, use /api prefix for Vite proxy
+  // Priority 3: In production without VITE_API_URL, try same origin
+  // This only works if frontend and backend are on the same domain
   return '/api';
 };
 
@@ -29,6 +25,8 @@ const api = axios.create({
   },
   timeout: 10000,
 });
+
+console.log('🔗 API Base URL:', getBaseURL());
 
 // Request interceptor - Add JWT token to requests
 api.interceptors.request.use(

@@ -1,0 +1,264 @@
+================================================================================
+ATTENDANCE SYSTEM WITH FINGERPRINT - TECHNOLOGY STACK AND FOLDER STRUCTURE
+================================================================================
+
+PROJECT OVERVIEW:
+This is a comprehensive Attendance Management System with Fingerprint Integration.
+It consists of a modern React frontend and a Python FastAPI backend with database 
+integration for managing employee attendance, salaries, and user accounts.
+
+================================================================================
+FRONTEND TECHNOLOGY STACK
+================================================================================
+
+Language & Framework:
+  - React 18.2.0 - UI library for building user interfaces
+  - TypeScript 5.3.3 - Type-safe JavaScript superset
+  - Vite 5.0.12 - Fast build tool and development server
+
+Styling & UI:
+  - Tailwind CSS 3.4.1 - Utility-first CSS framework
+  - PostCSS 8.4.33 - CSS transformation tool
+  - Autoprefixer 10.4.17 - Vendor prefix automation
+  - Lucide React - Icon library
+
+Routing & Navigation:
+  - React Router DOM 6.21.3 - Client-side routing
+
+HTTP & API Communication:
+  - Axios 1.6.5 - Promise-based HTTP client
+
+Utilities & Helpers:
+  - date-fns 3.3.1 - Date formatting and manipulation
+  - react-hot-toast 2.4.1 - Toast notifications
+
+Development Tools:
+  - ESLint 8.56.0 - Code quality and linting
+  - @types packages - TypeScript definitions for libraries
+
+================================================================================
+BACKEND TECHNOLOGY STACK
+================================================================================
+
+Language & Framework:
+  - Python 3.x - Core programming language
+  - FastAPI 0.109.0 - Modern, fast web framework for APIs
+
+Server:
+  - Uvicorn 0.27.0 - ASGI web server
+
+Database:
+  - SQLAlchemy 2.0.23 - SQL toolkit and ORM
+  - SQLite (aiosqlite 0.19.0) - Lightweight database engine
+
+Authentication & Security:
+  - python-jose 3.3.0 - JWT token handling
+  - cryptography 41.0.7 - Encryption utilities
+  - Bcrypt 4.0.1 - Password hashing
+  - Passlib 1.7.4 - Password hashing library
+
+Data Validation:
+  - Pydantic 2.5.3 - Data validation using Python type hints
+  - Pydantic Settings 2.1.0 - Environment configuration management
+
+Utilities:
+  - python-dotenv 1.0.0 - Load environment variables from .env files
+  - python-multipart 0.0.6 - Multipart form data parsing
+
+================================================================================
+FOLDER STRUCTURE
+================================================================================
+
+Attendence-System-with-Fingerprint/
+│
+│
+├── backend/                         # Backend API server
+│   ├── app_launcher.py             # Application entry point
+│   ├── database.py                 # Database connection and setup
+│   ├── main.py                     # Main FastAPI application
+│   ├── migrate_database.py         # Database migration script
+│   ├── migrate_salaries.py         # Salary data migration script
+│   ├── requirements.txt            # Python dependencies
+│   │
+│   ├── auth/                       # Authentication module
+│   │   ├── __init__.py
+│   │   ├── dependencies.py         # Auth dependencies
+│   │   └── jwt_handler.py          # JWT token handling
+│   │
+│   ├── models/                     # Database models (ORM)
+│   │   ├── __init__.py
+│   │   ├── attendance.py           # Attendance model
+│   │   ├── employee.py             # Employee model
+│   │   ├── salary.py               # Salary model
+│   │   └── user.py                 # User model
+│   │
+│   ├── routers/                    # API endpoints (routes)
+│   │   ├── __init__.py
+│   │   ├── admin_users.py          # Admin user management endpoints
+│   │   ├── attendance.py           # Attendance endpoints
+│   │   ├── auth.py                 # Authentication endpoints
+│   │   ├── employees.py            # Employee management endpoints
+│   │   ├── salaries.py             # Salary management endpoints
+│   │   └── user_attendance.py      # User attendance endpoints
+│   │
+│   ├── schemas/                    # Pydantic schemas (request/response validation)
+│   │   ├── __init__.py
+│   │   ├── attendance.py           # Attendance schema
+│   │   ├── auth.py                 # Auth schema
+│   │   ├── employee.py             # Employee schema
+│   │   ├── salary.py               # Salary schema
+│   │   └── user.py                 # User schema
+│   │
+│   ├── services/                   # Business logic services
+│   │   ├── __init__.py
+│   │   ├── attendance_service.py   # Attendance business logic
+│   │   ├── employee_service.py     # Employee business logic
+│   │   └── salary_service.py       # Salary business logic
+│   │
+│   └── utils/                      # Utility functions
+│       ├── __init__.py
+│       ├── config.py               # Configuration settings
+│       ├── encryption.py           # Encryption utilities
+│       └── shifts.py               # Shift management utilities
+│
+└── frontend/                        # React TypeScript frontend
+    ├── index.html                   # HTML entry point
+    ├── package.json                 # Node.js dependencies and scripts
+    ├── postcss.config.js            # PostCSS configuration
+    ├── tailwind.config.js           # Tailwind CSS configuration
+    ├── tsconfig.json                # TypeScript configuration
+    ├── tsconfig.node.json           # TypeScript configuration for build tools
+    ├── vite.config.ts               # Vite build configuration
+    │
+    ├── src/                         # Source code
+    │   ├── App.tsx                  # Root React component
+    │   ├── index.css                # Global styles
+    │   ├── main.tsx                 # React DOM render entry
+    │   ├── vite-env.d.ts            # Vite environment type definitions
+    │   │
+    │   ├── api/                     # API client calls
+    │   │   ├── attendance.ts        # Attendance API calls
+    │   │   ├── auth.ts              # Authentication API calls
+    │   │   ├── axios.ts             # Axios client configuration
+    │   │   ├── employees.ts         # Employee API calls
+    │   │   ├── index.ts             # API exports
+    │   │   ├── manualAttendance.ts  # Manual attendance API calls
+    │   │   ├── salaries.ts          # Salary API calls
+    │   │   └── users.ts             # User management API calls
+    │   │
+    │   ├── components/              # Reusable React components
+    │   │   ├── Layout.tsx           # Layout wrapper component
+    │   │   ├── ProtectedRoute.tsx   # Route protection for auth
+    │   │   └── ui/                  # UI component library
+    │   │       ├── Badge.tsx        # Badge component
+    │   │       ├── Button.tsx       # Button component
+    │   │       ├── Card.tsx         # Card component
+    │   │       ├── index.ts         # UI exports
+    │   │       ├── Input.tsx        # Input component
+    │   │       ├── Modal.tsx        # Modal dialog component
+    │   │       ├── Select.tsx       # Dropdown select component
+    │   │       └── Table.tsx        # Table component
+    │   │
+    │   ├── context/                 # React Context for state management
+    │   │   └── AuthContext.tsx      # Authentication context
+    │   │
+    │   ├── pages/                   # Page components (route views)
+    │   │   ├── index.ts             # Page exports
+    │   │   ├── Attendance/          # Attendance page
+    │   │   │   ├── AttendancePage.tsx
+    │   │   │   └── index.ts
+    │   │   ├── Dashboard/           # Dashboard page
+    │   │   │   ├── DashboardPage.tsx
+    │   │   │   └── index.ts
+    │   │   ├── EmployeeReport/      # Employee report page
+    │   │   │   ├── EmployeeReportPage.tsx
+    │   │   │   └── index.ts
+    │   │   ├── Employees/           # Employee management page
+    │   │   │   ├── EmployeeModal.tsx
+    │   │   │   ├── EmployeesPage.tsx
+    │   │   │   ├── FingerprintModal.tsx
+    │   │   │   └── index.ts
+    │   │   ├── Kiosk/               # Kiosk mode page (fingerprint clock-in)
+    │   │   │   ├── index.ts
+    │   │   │   └── KioskPage.tsx
+    │   │   ├── Login/               # Login page
+    │   │   │   ├── index.ts
+    │   │   │   └── LoginPage.tsx
+    │   │   ├── ManualAttendance/    # Manual attendance marking page
+    │   │   │   ├── index.ts
+    │   │   │   └── ManualAttendancePage.tsx
+    │   │   ├── Register/            # User registration page
+    │   │   │   ├── index.ts
+    │   │   │   └── RegisterPage.tsx
+    │   │   ├── Reports/             # Reports pages
+    │   │   │   ├── index.ts
+    │   │   │   ├── ReportsPage.tsx
+    │   │   │   ├── UnifiedReportsPage.tsx
+    │   │   │   └── tabs/            # Report tabs
+    │   │   │       ├── AttendanceReports.tsx
+    │   │   │       ├── EmployeeReports.tsx
+    │   │   │       └── SalaryReports.tsx
+    │   │   ├── Salary/              # Salary management page
+    │   │   │   ├── index.ts
+    │   │   │   ├── SalaryFormPage.tsx
+    │   │   │   └── SalaryReportPage.tsx
+    │   │   └── UserManagement/      # User management page
+    │   │       ├── index.ts
+    │   │       └── UserManagementPage.tsx
+    │   │
+    │   ├── types/                   # TypeScript type definitions
+    │   │   └── index.ts             # Type exports
+    │   │
+    │   └── utils/                   # Utility functions
+    │       └── clsx.ts              # Class name utility
+    │
+    ├── .env                         # Environment variables (development)
+    └── .env.example                 # Example environment variables template
+
+================================================================================
+KEY FEATURES OF THE SYSTEM
+================================================================================
+
+Frontend Features:
+  ✓ User authentication and login
+  ✓ Employee management (CRUD operations)
+  ✓ Attendance tracking with fingerprint support
+  ✓ Kiosk mode for direct attendance marking
+  ✓ Manual attendance marking
+  ✓ Salary management and reports
+  ✓ Comprehensive reporting (Attendance, Employee, Salary)
+  ✓ User management for admins
+  ✓ Dashboard with key metrics
+  ✓ Responsive UI with Tailwind CSS
+
+Backend Features:
+  ✓ RESTful API with FastAPI
+  ✓ JWT-based authentication
+  ✓ Employee management endpoints
+  ✓ Attendance tracking endpoints
+  ✓ Salary calculation and management
+  ✓ User and admin management
+  ✓ Database persistence with SQLAlchemy ORM
+  ✓ Request validation with Pydantic
+  ✓ Encryption for sensitive data
+  ✓ Environment-based configuration
+
+================================================================================
+DEVELOPMENT SETUP
+================================================================================
+
+Frontend Setup:
+  1. Navigate to frontend directory: cd frontend
+  2. Install dependencies: npm install
+  3. Create .env file with API endpoint configuration
+  4. Start dev server: npm run dev
+
+Backend Setup:
+  1. Navigate to backend directory: cd backend
+  2. Create virtual environment: python -m venv venv
+  3. Activate virtual environment: source venv/bin/activate (Linux/Mac)
+  4. Install dependencies: pip install -r requirements.txt
+  5. Run migrations: python migrate_database.py
+  6. Start server: python app_launcher.py
+
+================================================================================

@@ -14,9 +14,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from database import init_db
+from utils.config import settings
 from routers import (
     auth_router,
     admin_users_router,
@@ -51,6 +52,8 @@ async def lifespan(app: FastAPI):
     print(f"📂 Static files exist: {os.path.exists(STATIC_DIR)}")
     if os.path.exists(STATIC_DIR):
         print(f"📂 Static files found: {os.listdir(STATIC_DIR)[:5]}")
+    print(f"🔧 Environment: {settings.ENVIRONMENT}")
+    print(f"🗄️  Database: {settings.DATABASE_URL.split('@')[-1] if '@' in settings.DATABASE_URL else settings.DATABASE_URL[:30]}...")
     init_db()
     print("✅ Database initialized successfully")
     
@@ -82,14 +85,51 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configure CORS
+# Configure CORS based on environment
+def get_cors_origins() -> list[str]:
+    """
+    Get allowed CORS origins based on environment.
+    """
+    if settings.ENVIRONMENT == "production":
+        # Production: Only allow specific frontend URL
+        origins = [settings.FRONTEND_URL]
+    else:
+        # Development: Allow localhost variants
+        origins = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:8000",
+            "http://127.0.0.1:8000",
+        ]
+        # Also add frontend URL if configured and different
+        if settings.FRONTEND_URL not in origins:
+            origins.append(settings.FRONTEND_URL)
+    
+    return origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Health Check Endpoint
+@app.get("/health", tags=["Health"])
+async def health_check():
+    """
+    Health check endpoint.
+    Returns the status of the API without requiring authentication.
+    """
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "healthy",
+            "message": "Fingerprint Attendance Management System is running",
+            "environment": settings.ENVIRONMENT,
+        }
+    )
 
 # Include routers
 # In production (exe), routes are at /admin, /device, /employees, etc
@@ -153,12 +193,6 @@ else:
             "version": "1.0.0",
             "docs": "/docs"
         }
-
-
-@app.get("/health", tags=["Health"])
-async def health_check():
-    """Health check endpoint for monitoring."""
-    return {"status": "healthy"}
 
 
 if __name__ == "__main__":

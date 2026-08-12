@@ -1,24 +1,60 @@
 """
 Database configuration and session management.
-Uses SQLAlchemy with SQLite database.
+Supports both SQLite (development) and PostgreSQL (production).
+Uses SQLAlchemy ORM with appropriate drivers and connection pooling.
 """
 import os
 import sqlite3
-
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker, declarative_base
-from sqlalchemy.pool import StaticPool
+from sqlalchemy.pool import StaticPool, NullPool
+from sqlalchemy.engine.url import make_url
 
 from utils.config import settings
 
-# Create SQLAlchemy engine
-# Using StaticPool for SQLite to handle concurrent connections
-engine = create_engine(
-    settings.DATABASE_URL,
-    connect_args={"check_same_thread": False},  # Required for SQLite
-    poolclass=StaticPool,
-    echo=False  # Set to True for SQL query logging
-)
+# Parse database URL
+db_url = make_url(settings.DATABASE_URL)
+is_sqlite = db_url.drivername.startswith("sqlite")
+is_postgresql = db_url.drivername.startswith("postgresql")
+
+# Create SQLAlchemy engine with appropriate configuration
+if is_sqlite:
+    # SQLite configuration for development
+    engine = create_engine(
+        settings.DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+        echo=False
+    )
+elif is_postgresql:
+    # PostgreSQL configuration for production
+    # Use asyncpg driver for better async support
+    if "asyncpg" not in settings.DATABASE_URL:
+        # If using standard postgresql:// URL, convert to asyncpg
+        db_url_str = str(settings.DATABASE_URL)
+        if db_url_str.startswith("postgresql://"):
+            db_url_str = db_url_str.replace("postgresql://", "postgresql+asyncpg://", 1)
+        engine = create_engine(
+            db_url_str,
+            pool_size=5,
+            max_overflow=10,
+            pool_pre_ping=True,  # Verify connections before use
+            echo=False
+        )
+    else:
+        engine = create_engine(
+            settings.DATABASE_URL,
+            pool_size=5,
+            max_overflow=10,
+            pool_pre_ping=True,
+            echo=False
+        )
+else:
+    # Fallback for other database types
+    engine = create_engine(
+        settings.DATABASE_URL,
+        echo=False
+    )
 
 # Create session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -43,17 +79,26 @@ def init_db():
     """
     Initialize database tables.
     Called on application startup.
+    For PostgreSQL: Creates all tables via SQLAlchemy.
+    For SQLite: Creates tables and runs migration checks for existing databases.
     """
     from models import employee, attendance, user, salary  # Import models to register them
     Base.metadata.create_all(bind=engine)
-    ensure_db_schema()
+    
+    # For SQLite only: ensure existing databases are updated with new columns
+    if is_sqlite:
+        ensure_db_schema()
 
 
 def ensure_db_schema():
     """
     Ensure existing SQLite databases are updated with new columns.
-    This keeps older databases compatible without data loss.
+    This keeps older SQLite databases compatible without data loss.
+    For PostgreSQL, SQLAlchemy handles schema management.
     """
+    if not is_sqlite:
+        return  # PostgreSQL doesn't need this manual schema adjustment
+    
     db_path = _get_sqlite_db_path()
     if not db_path or not os.path.exists(db_path):
         return
