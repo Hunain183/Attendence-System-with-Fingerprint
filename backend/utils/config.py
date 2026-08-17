@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     
     # Admin Credentials (for primary admin only)
     # Secondary admins are created via the user management system
-    ADMIN_USERNAME: str = "admin"
+    ADMIN_USERNAME: str = "Admin"
     ADMIN_PASSWORD: str = "admin123"
     
     # CORS Configuration

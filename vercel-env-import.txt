@@ -1,0 +1,13 @@
+DATABASE_URL=postgresql+asyncpg://YOUR_USER:YOUR_PASSWORD@YOUR_HOST/YOUR_DB?sslmode=require
+SECRET_KEY=change-this-to-a-long-random-secret
+JWT_ALGORITHM=HS256
+JWT_EXPIRATION_HOURS=24
+DEVICE_API_KEY=change-this-device-api-key
+ENCRYPTION_KEY=change-this-encryption-key
+ADMIN_USERNAME=Admin
+ADMIN_PASSWORD=admin123
+FRONTEND_URL=https://your-app.vercel.app
+SERVER_HOST=0.0.0.0
+SERVER_PORT=8000
+ENVIRONMENT=production
+VITE_API_URL=/api
