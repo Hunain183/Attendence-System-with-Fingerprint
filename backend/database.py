@@ -28,27 +28,14 @@ if is_sqlite:
     )
 elif is_postgresql:
     # PostgreSQL configuration for production
-    # Use asyncpg driver for better async support
-    if "asyncpg" not in settings.DATABASE_URL:
-        # If using standard postgresql:// URL, convert to asyncpg
-        db_url_str = str(settings.DATABASE_URL)
-        if db_url_str.startswith("postgresql://"):
-            db_url_str = db_url_str.replace("postgresql://", "postgresql+asyncpg://", 1)
-        engine = create_engine(
-            db_url_str,
-            pool_size=5,
-            max_overflow=10,
-            pool_pre_ping=True,  # Verify connections before use
-            echo=False
-        )
-    else:
-        engine = create_engine(
-            settings.DATABASE_URL,
-            pool_size=5,
-            max_overflow=10,
-            pool_pre_ping=True,
-            echo=False
-        )
+    # Use psycopg2 because this application uses synchronous SQLAlchemy sessions.
+    engine = create_engine(
+        settings.DATABASE_URL,
+        pool_size=5,
+        max_overflow=10,
+        pool_pre_ping=True,
+        echo=False
+    )
 else:
     # Fallback for other database types
     engine = create_engine(
