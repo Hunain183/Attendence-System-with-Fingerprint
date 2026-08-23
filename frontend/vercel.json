@@ -4,6 +4,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://attendence-system-with-fingerprint.vercel.app/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
