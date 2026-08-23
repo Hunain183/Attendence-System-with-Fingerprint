@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/api/admin/users/",
+      "destination": "https://attendence-system-with-fingerprint.vercel.app/api/admin/users/"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://attendence-system-with-fingerprint.vercel.app/api/:path*"
     },
